@@ -726,7 +726,7 @@ body.light .tile:hover:not(.sel):not(.off) { background:rgba(26,95,192,.06); }
   }
   @media(max-width:500px) { .ws-cell { width:26px; height:26px; font-size:.6rem; } }
   body.light .ws-cell { color:#0a1825; }
-  .ws-cell.selecting { background:rgba(255,220,0,.35); border-color:#cc9900; color:#000 !important; }
+  /* selection handled via inline styles in JS for guaranteed visibility */
   .ws-cell.found { color:#000 !important; border-color:transparent !important; font-weight:900; text-shadow: 0 0 2px rgba(0,0,0,.3); }
   .ws-cell.fc0 { background:var(--found1); }
   .ws-cell.fc1 { background:var(--found2); }
@@ -2372,7 +2372,7 @@ function renderGrid() {
     if (t) startSelect(+t.dataset.r, +t.dataset.c, e);
   };
   el.onmouseover = e => {
-    if (!selecting) return;
+    if (!selecting || e.buttons === 0) return;  // e.buttons===0 means no button held
     const t = e.target.closest('.ws-cell');
     if (t) moveSelect(+t.dataset.r, +t.dataset.c, e);
   };
@@ -2483,15 +2483,32 @@ function getCellsInLine(r1, c1, r2, c2) {
 }
 
 function highlightSelecting() {
-  document.querySelectorAll('.ws-cell.selecting').forEach(el => el.classList.remove('selecting'));
+  // Clear previous selection using inline style (immune to CSS cascade issues)
+  document.querySelectorAll('#ws-grid .ws-cell').forEach(el => {
+    if (!el.classList.contains('found')) {
+      el.style.background = '';
+      el.style.color = '';
+      el.style.outline = '';
+    }
+  });
   selectCells.forEach(([r,c]) => {
     const el = getCell(r,c);
-    if (el && !el.classList.contains('found')) el.classList.add('selecting');
+    if (el && !el.classList.contains('found')) {
+      el.style.background = 'rgba(255,200,0,0.5)';
+      el.style.color = '#000';
+      el.style.outline = '2px solid #cc8800';
+    }
   });
 }
 
 function clearSelecting() {
-  document.querySelectorAll('.ws-cell.selecting').forEach(el => el.classList.remove('selecting'));
+  document.querySelectorAll('#ws-grid .ws-cell').forEach(el => {
+    if (!el.classList.contains('found')) {
+      el.style.background = '';
+      el.style.color = '';
+      el.style.outline = '';
+    }
+  });
 }
 
 function getCell(r, c) {
