@@ -12,8 +12,8 @@
     --accent:#00d4ff; --accent2:#ff6b35; --accent3:#39ff14;
     --text:#e0f0ff; --text-dim:#6b8cad;
     --red:#ff4757; --yellow:#ffd32a; --green:#39ff14; --p1:#00d4ff; --p2:#ff6b35;
-    --found1:#39ff14; --found2:#00d4ff; --found3:#ff4d6d;
-    --found4:#ffd32a; --found5:#bf7fff; --found6:#ff9900;
+    --found1:#5dde3a; --found2:#00d4ff; --found3:#ff4d6d;
+    --found4:#ffd700; --found5:#bf7fff; --found6:#ff9900;
     --dysfont:'OpenDyslexic','Comic Sans MS',cursive;
   }
   body.light { --bg:#f0f4f8; --surface:#fff; --surface2:#e8edf5; --border:#b0c4de; --text:#0a1825; --text-dim:#4a6a8a; --accent:#0077a8; --accent2:#c85000; }
@@ -726,20 +726,20 @@ body.light .tile:hover:not(.sel):not(.off) { background:rgba(26,95,192,.06); }
   }
   @media(max-width:500px) { .ws-cell { width:26px; height:26px; font-size:.6rem; } }
   body.light .ws-cell { color:#0a1825; }
-  .ws-cell.selecting { background:rgba(0,229,255,.12); border-color:var(--accent); color:var(--accent); }
-  .ws-cell.found { color:#000 !important; border-color:transparent !important; font-weight:900; }
+  .ws-cell.selecting { background:rgba(255,220,0,.35); border-color:#cc9900; color:#000 !important; }
+  .ws-cell.found { color:#000 !important; border-color:transparent !important; font-weight:900; text-shadow: 0 0 2px rgba(0,0,0,.3); }
   .ws-cell.fc0 { background:var(--found1); }
   .ws-cell.fc1 { background:var(--found2); }
   .ws-cell.fc2 { background:var(--found3); }
   .ws-cell.fc3 { background:var(--found4); }
   .ws-cell.fc4 { background:var(--found5); }
   .ws-cell.fc5 { background:var(--found6); }
-  body.light .ws-cell.fc0 { color:#fff; }
-  body.light .ws-cell.fc1 { color:#fff; }
-  body.light .ws-cell.fc2 { color:#fff; }
-  body.light .ws-cell.fc3 { color:#000; }
-  body.light .ws-cell.fc4 { color:#fff; }
-  body.light .ws-cell.fc5 { color:#fff; }
+  body.light .ws-cell.fc0 { color:#1a3a00; }
+  body.light .ws-cell.fc1 { color:#003a50; }
+  body.light .ws-cell.fc2 { color:#500010; }
+  body.light .ws-cell.fc3 { color:#443300; }
+  body.light .ws-cell.fc4 { color:#2d0060; }
+  body.light .ws-cell.fc5 { color:#442200; }
   @keyframes flip { 0%{transform:scaleY(1)} 50%{transform:scaleY(0)} 100%{transform:scaleY(1)} }
   @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-5px)} 75%{transform:translateX(5px)} }
   .ws-cell.flip  { animation:flip .4s ease; }
