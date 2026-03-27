@@ -37,10 +37,7 @@
   body.dyslexia {
     --dysfont:'OpenDyslexic','Comic Sans MS',cursive;
   }
-  /* Dyslexia dark mode: boost contrast */
-  body.dyslexia:not(.light) .word-item,
-  body.dyslexia:not(.light) #hint-text { color:#e8f4ff !important; }
-  body.dyslexia:not(.light) .ws-cell   { color:#c0d8f0 !important; }
+
   /* Apply dyslexic font to all reading content */
   body.dyslexia .quiz-opt, body.dyslexia .ch-opt, body.dyslexia .c4-opt,
   body.dyslexia #quiz-question, body.dyslexia #c4-q-text,
@@ -270,7 +267,10 @@
     --surf:var(--surface); --surf2:var(--surface2); --brd:var(--border); --txt:var(--text); --dim:var(--text-dim);
   }
   body.light { --tile-bg:#fff; --tile-sel:rgba(26,95,192,0.1); --shad:0 1px 4px rgba(0,0,0,.09); }
-  body.superpower { --bg:#fdf8ee; --surface:#fffdf5; --surface2:#f5edd6; --border:#d4c4a0; }
+  body.dyslexia, body.superpower {
+    --bg:#fdf8ee; --surface:#fffdf5; --surface2:#f5edd6; --border:#d4c4a0;
+    --text:#2c1a00; --text-dim:#6b4c20; --accent:#005f7a; --accent2:#a03000;
+  }
 
   /* ── Colour filter overlay div ── */
   #colour-overlay {
@@ -523,6 +523,12 @@ body.light .sb.c4 { background:rgba(192,32,106,.09);border-color:rgba(192,32,106
 .sb.c3 .sbcat { color:var(--c3); }
 .sb.c4 .sbcat { color:var(--c4); }
 .sbwords { font-size:.84rem;font-weight:700;color:var(--txt); }
+.sb { color:var(--txt); }
+.sb.c1 { background:rgba(245,158,11,.25);border:2px solid rgba(245,158,11,.7); }
+.sb.c2 { background:rgba(16,185,129,.25);border:2px solid rgba(16,185,129,.7); }
+.sb.c3 { background:rgba(59,130,246,.25);border:2px solid rgba(59,130,246,.7); }
+.sb.c4 { background:rgba(236,72,153,.25);border:2px solid rgba(236,72,153,.7); }
+body.light .sb { color:#1a2535; }
 
 /* ══ STATUS ═══════════════════════════════════ */
 .status {
@@ -1184,6 +1190,7 @@ body.light .tile:hover:not(.sel):not(.off) { background:rgba(26,95,192,.06); }
 <!-- ONLY CONNECT -->
 <div id="onlyconnect" class="screen">
   <div class="section-header"><h2>🔗 ONLY CONNECT</h2><p>// group four cs terms that share a hidden connection //</p></div>
+  <div style="max-width:680px;margin:0 auto;">
 <div class="psel" id="psel"></div>
 
 <!-- DIFFICULTY KEY -->
@@ -1235,7 +1242,7 @@ body.light .tile:hover:not(.sel):not(.off) { background:rgba(26,95,192,.06); }
   </div>
 </details>
 
-</div>
+</div></div>
 
 
 </div>
@@ -2162,7 +2169,8 @@ function wsClearLB() {
 }
 
 function wsSubmitScore() {
-  const name = (document.getElementById('winner-name').value || '').trim() || playerName || 'Anonymous';
+  const nameVal = (document.getElementById('winner-name').value || '').trim();
+  const name = nameVal || playerName || 'Anonymous';
   wsAddToLB(name, seconds, difficulty);
   wsRenderLB();
   document.getElementById('ws-win-overlay').classList.remove('show');
@@ -2453,29 +2461,24 @@ function endSelect(e) {
 }
 
 function getCellsInLine(r1, c1, r2, c2) {
+  if (r1===r2 && c1===c2) return [[r1,c1]];
   const dr = r2-r1, dc = c2-c1;
-  const len = Math.max(Math.abs(dr), Math.abs(dc));
-  if (len === 0) return [[r1,c1]];
 
-  // Snap to closest 8-direction
-  const stepR = dr===0 ? 0 : (dr>0?1:-1);
-  const stepC = dc===0 ? 0 : (dc>0?1:-1);
+  // Work out which of the 8 strict directions best matches the drag angle
+  const angle = Math.atan2(dc, dr) * 180 / Math.PI; // -180 to 180
+  // Snap angle to nearest 45°
+  const snapped = Math.round(angle / 45) * 45;
+  const stepR = Math.round(Math.sin(snapped * Math.PI / 180));
+  const stepC = Math.round(Math.cos(snapped * Math.PI / 180));
 
-  // Check if diagonal (both change) vs straight
-  const isDiag = Math.abs(dr)>0 && Math.abs(dc)>0;
-  if (isDiag && Math.abs(dr) !== Math.abs(dc)) {
-    // Not a clean diagonal - snap to whichever is dominant
-    const useR = Math.abs(dr) >= Math.abs(dc);
-    const cells = [];
-    for (let i=0; i<=Math.abs(useR?dr:dc); i++) {
-      cells.push([r1 + (useR?stepR*i:0), c1 + (useR?0:stepC*i)]);
-    }
-    return cells;
-  }
+  // Length = how many steps along the snapped direction
+  const len = (stepR !== 0 && stepC !== 0)
+    ? Math.round(Math.max(Math.abs(dr), Math.abs(dc)))  // diagonal
+    : (stepR !== 0 ? Math.abs(dr) : Math.abs(dc));      // straight
 
   const cells = [];
   for (let i=0; i<=len; i++) cells.push([r1+stepR*i, c1+stepC*i]);
-  return cells;
+  return cells.filter(([r,c]) => r>=0 && r<gridSize && c>=0 && c<gridSize);
 }
 
 function highlightSelecting() {
@@ -2564,9 +2567,10 @@ function showWin() {
   const m = String(Math.floor(seconds/60)).padStart(2,'0');
   const s = String(seconds%60).padStart(2,'0');
   document.getElementById('win-time-val').textContent = `${m}:${s}`;
-  document.getElementById('winner-name').value = '';
+  const nameInp = document.getElementById('winner-name');
+  nameInp.value = playerName || '';
   document.getElementById('ws-win-overlay').classList.add('show');
-  setTimeout(() => document.getElementById('winner-name').focus(), 200);
+  setTimeout(() => nameInp.focus(), 200);
 }
 
 // ═══════════════════════════════════════════════════════════
