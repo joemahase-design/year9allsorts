@@ -529,6 +529,11 @@ body.light .sb.c4 { background:rgba(192,32,106,.09);border-color:rgba(192,32,106
 .sb.c3 { background:rgba(59,130,246,.25);border:2px solid rgba(59,130,246,.7); }
 .sb.c4 { background:rgba(236,72,153,.25);border:2px solid rgba(236,72,153,.7); }
 body.light .sb { color:#1a2535; }
+body.light .sb.c1 .sbcat { color:#7a5500; font-weight:900; }
+body.light .sb.c2 .sbcat { color:#085a30; font-weight:900; }
+body.light .sb.c3 .sbcat { color:#0a3a80; font-weight:900; }
+body.light .sb.c4 .sbcat { color:#7a0040; font-weight:900; }
+body.light .sbwords      { color:#1a2535 !important; font-weight:700; }
 
 /* ══ STATUS ═══════════════════════════════════ */
 .status {
@@ -727,10 +732,9 @@ body.light .tile:hover:not(.sel):not(.off) { background:rgba(26,95,192,.06); }
   @media(max-width:500px) { .ws-cell { width:26px; height:26px; font-size:.6rem; } }
   body.light .ws-cell { color:#0a1825; }
   .ws-cell.selecting {
-    background:rgba(0,229,255,.08);
-    border-color:var(--accent);
-    color:var(--accent);
-    box-shadow: inset 0 0 0 2px var(--accent);
+    outline: 2px solid var(--accent);
+    outline-offset: -1px;
+    /* No background change - letter stays readable, highlight is just an outline */
   }
   .ws-cell.found { color:#000 !important; border-color:transparent !important; font-weight:900; text-shadow: 0 0 2px rgba(0,0,0,.3); }
   .ws-cell.fc0 { background:var(--found1); }
@@ -2372,17 +2376,19 @@ function renderGrid() {
       cell.dataset.r = r; cell.dataset.c = c;
 
       // Mouse events
-      cell.addEventListener('mousedown',  e => startSelect(r,c,e));
-      cell.addEventListener('mouseover',  e => { if (e.buttons === 1) moveSelect(r,c,e); });
-      cell.addEventListener('mouseup',    e => endSelect(e));
-      // Touch events
-      cell.addEventListener('touchstart', e => { e.preventDefault(); startSelect(r,c,e); }, {passive:false});
-      cell.addEventListener('touchmove',  e => { e.preventDefault(); handleTouchMove(e); }, {passive:false});
-      cell.addEventListener('touchend',   e => { e.preventDefault(); endSelect(e); }, {passive:false});
+      cell.addEventListener('pointerdown', e => { e.currentTarget.setPointerCapture(e.pointerId); startSelect(r,c,e); });
+      cell.addEventListener('pointerup',   e => endSelect(e));
 
       el.appendChild(cell);
     }
   }
+  // Single pointermove on grid - works for mouse AND touch AND trackpad
+  el.addEventListener('pointermove', e => {
+    if (!selecting) return;
+    const t = document.elementFromPoint(e.clientX, e.clientY);
+    const cell = t && t.closest('.ws-cell');
+    if (cell) moveSelect(+cell.dataset.r, +cell.dataset.c, e);
+  });
 }
 
 function renderWordList() {
