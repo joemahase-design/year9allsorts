@@ -1,0 +1,2624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CBA — Year 9 Computer Science Arena</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600&family=Syne:wght@400;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<style>
+
+  :root {
+    --bg:#0a0e1a; --surface:#111827; --surface2:#1a2235; --border:#1e3a5f;
+    --accent:#00d4ff; --accent2:#ff6b35; --accent3:#39ff14;
+    --text:#e0f0ff; --text-dim:#6b8cad;
+    --red:#ff4757; --yellow:#ffd32a; --green:#39ff14; --p1:#00d4ff; --p2:#ff6b35;
+  }
+  body.light { --bg:#f0f4f8; --surface:#fff; --surface2:#e8edf5; --border:#b0c4de; --text:#0a1825; --text-dim:#4a6a8a; --accent:#0077a8; --accent2:#c85000; }
+  body.light::before { background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,119,168,.03) 2px,rgba(0,119,168,.03) 4px); }
+  body.light .wordle-cell { background:#fff; }
+  body.light .kb-key,.light .hm-key { background:#e0e8f0; }
+  body.light .c4-opt,.light .quiz-opt { background:#edf2f7; color:var(--text); }
+  body.light .code-block { background:#1e1e2e; color:#cdd6f4; }
+
+  /* ── DYSLEXIA / SUPERPOWER MODE ── */
+  @font-face {
+    font-family:'OpenDyslexic';
+    src:url('https://cdn.jsdelivr.net/npm/opendyslexic@1.0.3/fonts/OpenDyslexic-Regular.otf') format('opentype');
+    font-weight:normal;
+  }
+  @font-face {
+    font-family:'OpenDyslexic';
+    src:url('https://cdn.jsdelivr.net/npm/opendyslexic@1.0.3/fonts/OpenDyslexic-Bold.otf') format('opentype');
+    font-weight:bold;
+  }
+  body.dyslexia {
+    --dysfont:'OpenDyslexic','Comic Sans MS',cursive;
+  }
+  /* Apply dyslexic font to all reading content */
+  body.dyslexia .quiz-opt, body.dyslexia .ch-opt, body.dyslexia .c4-opt,
+  body.dyslexia #quiz-question, body.dyslexia #c4-q-text,
+  body.dyslexia .ch-question, body.dyslexia #quiz-explanation,
+  body.dyslexia #ch-explanation, body.dyslexia #js-explanation,
+  body.dyslexia .hm-letter, body.dyslexia #hm-hint, body.dyslexia #hm-lives,
+  body.dyslexia #hm-guessed, body.dyslexia #wordle-hint,
+  body.dyslexia .word-item, body.dyslexia .card-desc,
+  body.dyslexia .card-topic, body.dyslexia #py-question, body.dyslexia #js-question,
+  body.dyslexia .ch-topic { font-family:var(--dysfont) !important; }
+  body.dyslexia #quiz-question { font-size:1.25rem; line-height:1.8; letter-spacing:.03em; }
+  body.dyslexia .quiz-opt      { font-size:.95rem;  line-height:1.7; letter-spacing:.02em; padding:.9rem 1rem; }
+  body.dyslexia .ch-opt        { font-size:.88rem;  line-height:1.7; letter-spacing:.02em; }
+  body.dyslexia .c4-opt        { font-size:.86rem;  line-height:1.7; }
+  body.dyslexia #hm-hint       { font-size:.92rem;  line-height:1.8; }
+  body.dyslexia #wordle-hint   { font-size:.96rem;  line-height:1.8; }
+  body.dyslexia .ch-question   { font-size:1.15rem; line-height:1.8; letter-spacing:.02em; }
+  /* Cream tint helps many dyslexic readers */
+  body.dyslexia.light          { --bg:#fdf8ee; --surface:#fffdf5; --surface2:#f5edd6; --border:#d4c4a0; }
+  /* Superpower button styling */
+  .toggle-btn.active-super {
+    border-color:#f0a500; color:#f0a500;
+    background:rgba(240,165,0,.12);
+    box-shadow:0 0 12px rgba(240,165,0,.3);
+    animation:superPulse 2s infinite;
+  }
+  @keyframes superPulse {
+    0%,100% { box-shadow:0 0 8px rgba(240,165,0,.3); }
+    50%      { box-shadow:0 0 18px rgba(240,165,0,.6); }
+  }
+
+  .filter-overlay { position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:0;transition:opacity .3s; }
+  body.filter-blue  .filter-overlay { background:rgba(100,160,230,.18);opacity:1; }
+  body.filter-green .filter-overlay { background:rgba(80,200,120,.16);opacity:1; }
+
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:'Exo 2',sans-serif;min-height:100vh;overflow-x:hidden;transition:background .3s,color .3s;}
+  body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,212,255,.015) 2px,rgba(0,212,255,.015) 4px);pointer-events:none;z-index:0;}
+  .scanline{position:fixed;top:-100%;left:0;width:100%;height:200%;background:linear-gradient(transparent 50%,rgba(0,212,255,.025) 50%);background-size:100% 4px;animation:scanmove 8s linear infinite;pointer-events:none;z-index:1;}
+  @keyframes scanmove{to{top:0%;}}
+
+  header{text-align:center;padding:1.4rem 1rem 1rem;position:relative;z-index:10;border-bottom:1px solid var(--border);background:linear-gradient(180deg,rgba(0,212,255,.05) 0%,transparent 100%);}
+  header h1{font-family:'Orbitron',monospace;font-size:clamp(1.2rem,4vw,2.2rem);font-weight:900;letter-spacing:.12em;color:var(--accent);text-shadow:0 0 25px rgba(0,212,255,.5);}
+  header p{font-family:'Share Tech Mono',monospace;color:var(--text-dim);font-size:.76rem;margin-top:.3rem;letter-spacing:.08em;}
+  .header-controls{display:flex;justify-content:center;gap:.5rem;margin-top:.7rem;flex-wrap:wrap;}
+  .toggle-btn{font-family:'Share Tech Mono',monospace;font-size:.68rem;padding:.3rem .8rem;background:transparent;border:1px solid var(--border);color:var(--text-dim);cursor:pointer;transition:all .2s;}
+  .toggle-btn:hover{border-color:var(--accent);color:var(--accent);}
+  .toggle-btn.active-blue{border-color:#6495ED;color:#6495ED;background:rgba(100,149,237,.15);}
+  .toggle-btn.active-green{border-color:#3CB371;color:#3CB371;background:rgba(60,179,113,.12);}
+  .toggle-btn.active-light{border-color:var(--accent2);color:var(--accent2);background:rgba(255,107,53,.1);}
+
+  nav{display:flex;justify-content:center;gap:.35rem;padding:.8rem;flex-wrap:wrap;position:relative;z-index:10;border-bottom:1px solid var(--border);}
+  .nav-btn{font-family:'Orbitron',monospace;font-size:.58rem;font-weight:700;letter-spacing:.08em;padding:.45rem .85rem;background:transparent;border:1px solid var(--border);color:var(--text-dim);cursor:pointer;transition:all .2s;text-transform:uppercase;clip-path:polygon(6px 0%,100% 0%,calc(100% - 6px) 100%,0% 100%);}
+  .nav-btn:hover,.nav-btn.active{background:var(--accent);color:var(--bg);border-color:var(--accent);box-shadow:0 0 16px rgba(0,212,255,.4);text-shadow:none;}
+
+  .screen{display:none;position:relative;z-index:10;padding:1.8rem 1rem;min-height:60vh;}
+  .screen.active{display:block;}
+  #home{display:none;max-width:1000px;margin:0 auto;}
+  #home.active{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;}
+
+  .game-card{background:var(--surface);border:1px solid var(--border);padding:1.6rem 1.2rem;text-align:center;cursor:pointer;transition:all .25s;position:relative;overflow:hidden;}
+  .game-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--accent);transform:scaleX(0);transform-origin:left;transition:transform .3s;}
+  .game-card:hover::before{transform:scaleX(1);}
+  .game-card:hover{border-color:var(--accent);background:var(--surface2);transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,212,255,.15);}
+  .card-icon{font-size:2.4rem;margin-bottom:.7rem;display:block;}
+  .card-title{font-family:'Orbitron',monospace;font-size:.85rem;font-weight:700;color:var(--accent);margin-bottom:.4rem;}
+  .card-desc{font-size:.78rem;color:var(--text-dim);line-height:1.5;}
+  .card-topic{font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--accent2);margin-top:.5rem;letter-spacing:.05em;}
+
+  .section-header{text-align:center;margin-bottom:1.5rem;}
+  .section-header h2{font-family:'Orbitron',monospace;font-size:1.4rem;font-weight:700;color:var(--accent);text-shadow:0 0 16px rgba(0,212,255,.35);margin-bottom:.3rem;}
+  .section-header p{font-size:.8rem;color:var(--text-dim);font-family:'Share Tech Mono',monospace;}
+
+  .btn{font-family:'Orbitron',monospace;font-size:.7rem;font-weight:700;letter-spacing:.1em;padding:.55rem 1.3rem;background:transparent;border:1px solid var(--accent);color:var(--accent);cursor:pointer;transition:all .2s;text-transform:uppercase;}
+  .btn:hover{background:var(--accent);color:var(--bg);box-shadow:0 0 16px rgba(0,212,255,.35);}
+  .btn.accent2{border-color:var(--accent2);color:var(--accent2);}
+  .btn.accent2:hover{background:var(--accent2);color:#fff;}
+  .btn.green{border-color:var(--green);color:var(--green);}
+  .btn.green:hover{background:var(--green);color:var(--bg);}
+
+  .msg{font-family:'Share Tech Mono',monospace;font-size:.86rem;text-align:center;padding:.7rem;margin:.7rem 0;border:1px solid var(--border);min-height:2.3rem;}
+  .msg.correct{color:var(--green);border-color:var(--green);background:rgba(57,255,20,.05);}
+  .msg.wrong{color:var(--red);border-color:var(--red);background:rgba(255,71,87,.05);}
+  .msg.info{color:var(--accent);border-color:var(--accent);background:rgba(0,212,255,.05);}
+
+  /* ══ WORDLE ══ */
+  #wordle{max-width:500px;margin:0 auto;}
+  #wordle-category{font-family:'Share Tech Mono',monospace;font-size:.73rem;color:var(--accent2);text-align:center;margin-bottom:.4rem;letter-spacing:.08em;}
+  #wordle-hint{font-family:'Share Tech Mono',monospace;font-size:.85rem;color:var(--text)!important;text-align:center;margin-bottom:.9rem;padding:.6rem .8rem;border:1px dashed var(--border);line-height:1.5;}
+  #wordle-grid{display:flex;flex-direction:column;gap:4px;align-items:center;margin-bottom:.9rem;}
+  .wordle-row{display:flex;gap:4px;}
+  .wordle-cell{width:44px;height:44px;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:'Orbitron',monospace;font-size:1rem;font-weight:700;text-transform:uppercase;transition:all .15s;background:var(--surface);color:var(--text);}
+  .wordle-cell.correct{background:#1a3d1a;border-color:var(--green);color:var(--green);}
+  .wordle-cell.present{background:#3d2e00;border-color:var(--yellow);color:var(--yellow);}
+  .wordle-cell.absent{background:#1a1a1a;border-color:#333;color:#555;}
+  body.light .wordle-cell.absent{background:#ddd;border-color:#aaa;color:#999;}
+  @keyframes flip{0%{transform:scaleY(1)}50%{transform:scaleY(0)}100%{transform:scaleY(1)}}
+  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+  .wordle-cell.flip{animation:flip .4s ease;}
+  .wordle-row.shake{animation:shake .3s ease;}
+  #wordle-input-row{display:flex;gap:.5rem;justify-content:center;margin-bottom:.9rem;}
+  #wordle-input{font-family:'Share Tech Mono',monospace;font-size:1rem;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:.45rem .9rem;text-transform:uppercase;width:155px;letter-spacing:.2em;outline:none;}
+  #wordle-input:focus{border-color:var(--accent);}
+  #wordle-keyboard{display:flex;flex-direction:column;gap:4px;align-items:center;}
+  .kb-row{display:flex;gap:3px;}
+  .kb-key{font-family:'Share Tech Mono',monospace;font-size:.68rem;padding:.38rem .42rem;min-width:27px;background:var(--surface2);border:1px solid var(--border);color:var(--text);cursor:pointer;transition:all .15s;text-align:center;}
+  .kb-key:hover{border-color:var(--accent);color:var(--accent);}
+  .kb-key.correct{background:#1a3d1a;border-color:var(--green);color:var(--green);}
+  .kb-key.present{background:#3d2e00;border-color:var(--yellow);color:var(--yellow);}
+  .kb-key.absent{background:#111;border-color:#222;color:#333;}
+  .kb-key.wide{min-width:48px;}
+
+  /* ══ QUIZ ══ */
+  #quiz{max-width:620px;margin:0 auto;}
+  .quiz-meta{display:flex;justify-content:space-between;font-family:'Share Tech Mono',monospace;font-size:.74rem;color:var(--text-dim);margin-bottom:.9rem;padding-bottom:.55rem;border-bottom:1px solid var(--border);}
+  .quiz-meta span{color:var(--accent);}
+  .quiz-progress{width:100%;height:4px;background:var(--surface2);margin-bottom:1.1rem;}
+  .quiz-progress-bar{height:100%;background:var(--accent);transition:width .4s;box-shadow:0 0 8px var(--accent);}
+  #quiz-category-tag{font-family:'Share Tech Mono',monospace;font-size:.7rem;color:var(--accent2);margin-bottom:.4rem;letter-spacing:.08em;}
+  #quiz-question{font-size:1.2rem;font-weight:600;line-height:1.55;margin-bottom:1.1rem;padding:.9rem 1rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);color:var(--text)!important;}
+  .quiz-options{display:grid;grid-template-columns:1fr 1fr;gap:.45rem;margin-bottom:.9rem;}
+  @media(max-width:480px){.quiz-options{grid-template-columns:1fr;}}
+  .quiz-opt{padding:.7rem .85rem;background:var(--surface2);border:1px solid var(--border);color:var(--text)!important;cursor:pointer;font-size:.88rem;text-align:left;transition:all .15s;font-family:'Exo 2',sans-serif;}
+  .quiz-opt:hover:not(:disabled){border-color:var(--accent);color:var(--accent)!important;}
+  .quiz-opt.correct-ans{background:rgba(57,255,20,.1);border-color:var(--green);color:var(--green)!important;}
+  .quiz-opt.wrong-ans{background:rgba(255,71,87,.1);border-color:var(--red);color:var(--red)!important;}
+  #quiz-explanation{font-family:'Share Tech Mono',monospace;font-size:.8rem;color:var(--text-dim);padding:.7rem;border:1px dashed var(--border);line-height:1.6;display:none;margin-bottom:.7rem;}
+  .quiz-score-card{text-align:center;padding:2rem;}
+  .big-score{font-family:'Orbitron',monospace;font-size:3.5rem;font-weight:900;color:var(--accent);text-shadow:0 0 30px rgba(0,212,255,.5);margin-bottom:1rem;}
+
+  /* ══ CONNECT 4 ══ */
+  #connect4{max-width:700px;margin:0 auto;}
+  .c4-info{display:flex;justify-content:space-between;align-items:center;margin-bottom:.7rem;flex-wrap:wrap;gap:.5rem;}
+  .c4-player{font-family:'Share Tech Mono',monospace;font-size:.78rem;padding:.35rem .85rem;border:1px solid var(--border);transition:all .2s;}
+  .c4-player.p1{color:var(--p1);}
+  .c4-player.p2{color:var(--p2);}
+  .c4-player.active-player{border-width:2px;box-shadow:0 0 12px currentColor;}
+  #c4-turn-msg{font-family:'Share Tech Mono',monospace;font-size:.78rem;color:var(--text)!important;text-align:center;margin-bottom:.55rem;}
+  #c4-board{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;background:var(--surface);padding:7px;border:1px solid var(--border);margin-bottom:.7rem;}
+  .c4-col-btn{background:transparent;border:1px solid transparent;color:var(--text-dim);font-size:.85rem;cursor:pointer;padding:.18rem;transition:all .15s;}
+  .c4-col-btn:hover{color:var(--accent);border-color:var(--accent);}
+  .c4-cell{width:100%;aspect-ratio:1;border-radius:50%;background:var(--surface2);border:2px solid var(--border);transition:all .15s;}
+  .c4-cell.p1{background:var(--p1);border-color:var(--p1);box-shadow:0 0 8px var(--p1);}
+  .c4-cell.p2{background:var(--p2);border-color:var(--p2);box-shadow:0 0 8px var(--p2);}
+  .c4-cell.win{animation:pulse .5s infinite alternate;}
+  @keyframes pulse{from{opacity:1}to{opacity:.35}}
+  #c4-question-panel{background:var(--surface);border:1px solid var(--accent);padding:1rem;margin-bottom:.7rem;display:none;box-shadow:0 0 14px rgba(0,212,255,.1);}
+  #c4-question-panel h3{font-family:'Orbitron',monospace;font-size:.72rem;color:var(--accent2);margin-bottom:.55rem;letter-spacing:.1em;}
+  #c4-q-text{font-size:1.05rem;line-height:1.5;margin-bottom:.8rem;color:var(--text)!important;}
+  .c4-options{display:grid;grid-template-columns:1fr 1fr;gap:.4rem;}
+  .c4-opt{padding:.5rem .7rem;background:var(--surface2);border:1px solid var(--border);color:var(--text)!important;cursor:pointer;font-size:.8rem;text-align:left;transition:all .15s;}
+  .c4-opt:hover:not(:disabled){border-color:var(--accent);color:var(--accent)!important;}
+  .c4-opt.correct-ans{background:rgba(57,255,20,.1);border-color:var(--green);color:var(--green)!important;}
+  .c4-opt.wrong-ans{background:rgba(255,71,87,.1);border-color:var(--red);color:var(--red)!important;}
+
+  /* ══ HANGMAN ══ */
+  #hangman{max-width:560px;margin:0 auto;}
+  .hangman-layout{display:grid;grid-template-columns:155px 1fr;gap:1.8rem;align-items:start;}
+  @media(max-width:480px){.hangman-layout{grid-template-columns:1fr;}}
+  #hangman-svg{width:155px;height:175px;}
+  .hm-part{opacity:0;}
+  .hm-part.show{opacity:1;}
+  #hm-category{font-family:'Share Tech Mono',monospace;font-size:.7rem;color:var(--accent2);letter-spacing:.1em;margin-bottom:.3rem;}
+  #hm-hint{font-family:'Share Tech Mono',monospace;font-size:.83rem;color:var(--text)!important;margin-bottom:.8rem;line-height:1.5;padding:.5rem .65rem;border:1px dashed var(--border);}
+  #hm-word-display{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:.9rem;}
+  .hm-letter{width:27px;height:32px;border-bottom:2px solid var(--accent);display:flex;align-items:center;justify-content:center;font-family:'Orbitron',monospace;font-size:1rem;font-weight:700;text-transform:uppercase;color:var(--text);}
+  .hm-letter.space{border-bottom-color:transparent;width:12px;}
+  #hm-lives{font-family:'Share Tech Mono',monospace;font-size:.78rem;color:var(--text-dim);margin-bottom:.8rem;}
+  #hm-guessed{font-family:'Share Tech Mono',monospace;font-size:.7rem;color:var(--text-dim);margin-bottom:.8rem;min-height:1.4rem;}
+  #hm-keyboard{display:flex;flex-wrap:wrap;gap:3px;margin-bottom:.8rem;}
+  .hm-key{font-family:'Share Tech Mono',monospace;font-size:.7rem;width:29px;height:29px;background:var(--surface2);border:1px solid var(--border);color:var(--text);cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;}
+  .hm-key:hover:not(:disabled){border-color:var(--accent);color:var(--accent);}
+  .hm-key:disabled{opacity:.2;cursor:default;}
+  .hm-key.hit{background:rgba(57,255,20,.15);border-color:var(--green);color:var(--green);}
+  .hm-key.miss{background:rgba(255,71,87,.1);border-color:var(--red);color:var(--red);}
+
+  /* ══ CODE CHALLENGES (Python & JS) ══ */
+  .challenge-screen{max-width:700px;margin:0 auto;}
+  .challenge-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.2rem;padding:.6rem 1rem;background:var(--surface);border:1px solid var(--border);}
+  .ch-meta{font-family:'Share Tech Mono',monospace;font-size:.72rem;color:var(--text-dim);}
+  .ch-meta span{color:var(--accent);}
+  .challenge-card{background:var(--surface);border:1px solid var(--border);padding:1.2rem;margin-bottom:1rem;}
+  .ch-topic{font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--accent2);letter-spacing:.1em;margin-bottom:.5rem;}
+  .ch-question{font-size:1.1rem;font-weight:600;line-height:1.6;color:var(--text)!important;margin-bottom:.9rem;}
+  .code-block{background:#0d1117;border:1px solid var(--border);padding:.8rem 1rem;font-family:'Share Tech Mono',monospace;font-size:.82rem;line-height:1.7;color:#c9d1d9;margin-bottom:.9rem;white-space:pre;overflow-x:auto;border-left:3px solid var(--accent);}
+  .code-block .kw{color:#ff7b72;}
+  .code-block .fn{color:#d2a8ff;}
+  .code-block .st{color:#a5d6ff;}
+  .code-block .cm{color:#8b949e;font-style:italic;}
+  .code-block .nm{color:#79c0ff;}
+  .ch-options{display:grid;grid-template-columns:1fr 1fr;gap:.45rem;margin-bottom:.8rem;}
+  @media(max-width:480px){.ch-options{grid-template-columns:1fr;}}
+  .ch-opt{padding:.65rem .8rem;background:var(--surface2);border:1px solid var(--border);color:var(--text)!important;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:.82rem;text-align:left;transition:all .15s;}
+  .ch-opt:hover:not(:disabled){border-color:var(--accent);color:var(--accent)!important;}
+  .ch-opt.correct-ans{background:rgba(57,255,20,.1);border-color:var(--green);color:var(--green)!important;}
+  .ch-opt.wrong-ans{background:rgba(255,71,87,.1);border-color:var(--red);color:var(--red)!important;}
+  #ch-explanation{font-family:'Share Tech Mono',monospace;font-size:.78rem;color:var(--text-dim);padding:.7rem;border:1px dashed var(--border);line-height:1.6;display:none;margin-bottom:.7rem;}
+  .ch-score-card{text-align:center;padding:2rem;}
+  .ch-progress-bar-wrap{width:100%;height:5px;background:var(--surface2);margin-bottom:1rem;}
+  .ch-progress-bar{height:100%;background:var(--accent2);transition:width .4s;box-shadow:0 0 8px var(--accent2);}
+  .lang-badge{display:inline-block;font-family:'Share Tech Mono',monospace;font-size:.6rem;padding:.15rem .5rem;border:1px solid;letter-spacing:.1em;margin-right:.4rem;}
+  .lang-badge.py{border-color:#3572A5;color:#3572A5;background:rgba(53,114,165,.08);}
+  .lang-badge.js{border-color:#f7df1e;color:#b8a800;background:rgba(247,223,30,.06);}
+
+  /* ══ LEADERBOARD ══ */
+  #leaderboard{max-width:520px;margin:0 auto;}
+
+  footer{text-align:center;padding:1.1rem;font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--text-dim);border-top:1px solid var(--border);position:relative;z-index:10;letter-spacing:.05em;}
+  .flex-center{display:flex;justify-content:center;gap:.8rem;flex-wrap:wrap;}
+
+
+  /* ── OC tile colour variables ── */
+  :root {
+    --c1:#f59e0b; --c2:#10b981; --c3:#3b82f6; --c4:#ec4899;
+    --tile-bg:var(--surface2); --tile-sel:rgba(59,130,246,0.18); --shad:none;
+    --surf:var(--surface); --surf2:var(--surface2); --brd:var(--border); --txt:var(--text); --dim:var(--text-dim);
+  }
+  body.light { --tile-bg:#fff; --tile-sel:rgba(26,95,192,0.1); --shad:0 1px 4px rgba(0,0,0,.09); }
+  body.superpower { --bg:#fdf8ee; --surface:#fffdf5; --surface2:#f5edd6; --border:#d4c4a0; }
+
+  /* ── Colour filter overlays ── */
+  body.cf-blue::after   { content:''; position:fixed; inset:0; background:rgba(150,200,255,.20); pointer-events:none; z-index:9998; }
+  body.cf-green::after  { content:''; position:fixed; inset:0; background:rgba(140,240,180,.20); pointer-events:none; z-index:9998; }
+  body.cf-yellow::after { content:''; position:fixed; inset:0; background:rgba(255,238,120,.20); pointer-events:none; z-index:9998; }
+  body.cf-pink::after   { content:''; position:fixed; inset:0; background:rgba(255,180,210,.20); pointer-events:none; z-index:9998; }
+
+  /* ── Colour filter dropdown ── */
+  .cf-dropdown { position:relative; display:inline-block; }
+  .cf-menu { display:none; position:absolute; top:110%; left:0; background:var(--surface);
+             border:1px solid var(--border); z-index:300; min-width:130px; box-shadow:0 4px 12px rgba(0,0,0,.3); }
+  .cf-menu.open { display:block; }
+  .cf-opt { display:block; width:100%; padding:.35rem .8rem; background:transparent; border:none;
+            color:var(--text-dim); font-family:'Share Tech Mono',monospace; font-size:.62rem;
+            cursor:pointer; text-align:left; transition:background .15s; }
+  .cf-opt:hover, .cf-opt.cf-active { background:var(--accent); color:var(--bg); }
+  #btn-cf { font-family:'Share Tech Mono',monospace; font-size:.62rem; padding:.3rem .8rem;
+            background:transparent; border:1px solid var(--border); color:var(--dim); cursor:pointer; transition:all .18s; }
+  #btn-cf:hover { border-color:var(--accent); color:var(--accent); }
+  #btn-cf.cf-active { border-color:var(--accent2); color:var(--accent2); background:rgba(255,107,53,.08); }
+
+  /* ── OC game CSS ── */
+body.superpower .tile {
+  font-size:.74rem !important;
+  padding:9px 5px !important;
+}
+
+body:not(.light):not(.superpower)::before {
+  content:'';
+  position:fixed;
+  inset:0;
+  background-image:
+    linear-gradient(rgba(59,130,246,.04) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(59,130,246,.04) 1px,transparent 1px);
+  background-size:32px 32px;
+  pointer-events:none;
+  z-index:0;
+}
+
+/* ══ LAYOUT ══════════════════════════════════ */
+.wrap {
+  position:relative;
+  z-index:1;
+  width:100%;
+  max-width:780px;
+  padding:14px 16px 40px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+}
+
+/* ══ TOOLBAR ══════════════════════════════════ */
+.toolbar {
+  display:flex;
+  justify-content:flex-end;
+  align-items:center;
+  gap:7px;
+  flex-wrap:wrap;
+  width:100%;
+  margin-bottom:8px;
+  position:relative;
+  z-index:100;
+}
+
+.tbtn {
+  font-family:'JetBrains Mono',monospace;
+  font-size:.64rem;
+  font-weight:700;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  padding:6px 13px;
+  border-radius:20px;
+  border:1px solid var(--brd);
+  background:var(--surf);
+  color:var(--dim);
+  cursor:pointer;
+  transition:all .22s;
+  white-space:nowrap;
+}
+.tbtn:hover         { border-color:var(--c3);color:var(--c3); }
+.tbtn.on            { background:var(--c3);border-color:var(--c3);color:#fff; }
+.tbtn.sp            { border-color:#c8900a;color:#7a5000; }
+.tbtn.sp:hover      { background:rgba(200,144,10,.12);border-color:#c8900a; }
+.tbtn.sp.on         { background:linear-gradient(135deg,#f5a623,#c8900a);border-color:#c8900a;color:#fff; }
+
+/* filter dropdown */
+.fd-wrap { position:relative; }
+
+.fd-menu {
+  display:none;
+  position:absolute;
+  right:0;
+  top:calc(100% + 6px);
+  background:var(--surf);
+  border:1px solid var(--brd);
+  border-radius:10px;
+  padding:6px;
+  flex-direction:column;
+  gap:4px;
+  min-width:140px;
+  z-index:9999;
+  box-shadow:0 8px 28px rgba(0,0,0,.35);
+}
+.fd-menu.open { display:flex; }
+
+.fo {
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:.63rem;
+  font-weight:700;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  padding:7px 11px;
+  border-radius:6px;
+  border:1px solid transparent;
+  background:transparent;
+  color:var(--dim);
+  cursor:pointer;
+  transition:all .18s;
+  text-align:left;
+  width:100%;
+}
+.fo:hover { background:var(--surf2);color:var(--txt); }
+.fo.on    { border-color:var(--c3);background:var(--tile-sel);color:var(--txt); }
+
+.fsw {
+  width:12px;height:12px;
+  border-radius:3px;
+  flex-shrink:0;
+  border:1px solid rgba(0,0,0,.15);
+}
+
+/* ══ HEADER ══════════════════════════════════ */
+.header { text-align:center;padding:18px 0 14px;width:100%; }
+
+.logo {
+  font-family:'JetBrains Mono',monospace;
+  font-size:clamp(1.2rem,4vw,1.9rem);
+  font-weight:800;
+  letter-spacing:.06em;
+  color:var(--txt);
+}
+.logo em { color:var(--c3);font-style:normal; }
+.logo::after {
+  content:'';
+  display:block;
+  height:2px;
+  background:linear-gradient(90deg,transparent,var(--c3),var(--c4),transparent);
+  margin-top:5px;
+  border-radius:2px;
+}
+
+.tagline {
+  font-family:'JetBrains Mono',monospace;
+  font-size:.66rem;
+  color:var(--dim);
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  margin-top:7px;
+}
+
+/* ══ PUZZLE PICKER ════════════════════════════ */
+.psel {
+  display:flex;
+  gap:6px;
+  flex-wrap:wrap;
+  justify-content:center;
+  margin:10px 0 6px;
+}
+
+.pbtn {
+  font-family:'JetBrains Mono',monospace;
+  font-size:.66rem;
+  font-weight:700;
+  letter-spacing:.08em;
+  padding:5px 13px;
+  border-radius:6px;
+  border:1px solid var(--brd);
+  background:var(--surf);
+  color:var(--dim);
+  cursor:pointer;
+  transition:all .22s;
+  text-transform:uppercase;
+}
+.pbtn:hover  { border-color:var(--c3);color:var(--c3); }
+.pbtn.active { background:var(--c3);border-color:var(--c3);color:#000; }
+
+/* ══ DIFFICULTY KEY ═══════════════════════════ */
+.drow {
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+  justify-content:center;
+  margin:5px 0;
+}
+.ditem {
+  display:flex;
+  align-items:center;
+  gap:5px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:.6rem;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:var(--dim);
+}
+.ddot { width:9px;height:9px;border-radius:2px;flex-shrink:0; }
+
+/* ══ LIVES ════════════════════════════════════ */
+.lives-row { display:flex;align-items:center;gap:9px;margin:8px 0 11px; }
+.llbl { font-family:'JetBrains Mono',monospace;font-size:.64rem;color:var(--dim);letter-spacing:.14em;text-transform:uppercase; }
+.life { width:15px;height:15px;border-radius:50%;background:var(--c2);box-shadow:0 0 7px rgba(16,185,129,.4);transition:all .3s; }
+.life.lost { background:var(--brd);box-shadow:none; }
+
+/* ══ SOLVED BANNERS ═══════════════════════════ */
+.sbgroup { width:100%;display:flex;flex-direction:column;gap:5px;margin-bottom:5px; }
+
+.sb {
+  border-radius:9px;
+  padding:10px 15px;
+  display:flex;
+  flex-direction:column;
+  gap:3px;
+  animation:sbin .42s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes sbin { from{opacity:0;transform:translateY(-10px) scale(.96)} to{opacity:1;transform:none} }
+
+.sb.c1 { background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.4); }
+.sb.c2 { background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.4); }
+.sb.c3 { background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.4); }
+.sb.c4 { background:rgba(236,72,153,.12);border:1px solid rgba(236,72,153,.4); }
+
+body.light .sb.c1 { background:rgba(200,144,10,.09);border-color:rgba(200,144,10,.45); }
+body.light .sb.c2 { background:rgba(13,140,78,.09); border-color:rgba(13,140,78,.45); }
+body.light .sb.c3 { background:rgba(26,95,192,.09); border-color:rgba(26,95,192,.45); }
+body.light .sb.c4 { background:rgba(192,32,106,.09);border-color:rgba(192,32,106,.45); }
+
+.sbcat {
+  font-family:'JetBrains Mono',monospace;
+  font-size:.62rem;font-weight:700;
+  letter-spacing:.18em;text-transform:uppercase;
+}
+.sb.c1 .sbcat { color:var(--c1); }
+.sb.c2 .sbcat { color:var(--c2); }
+.sb.c3 .sbcat { color:var(--c3); }
+.sb.c4 .sbcat { color:var(--c4); }
+.sbwords { font-size:.84rem;font-weight:700;color:var(--txt); }
+
+/* ══ STATUS ═══════════════════════════════════ */
+.status {
+  font-family:'JetBrains Mono',monospace;
+  font-size:.72rem;font-weight:600;
+  letter-spacing:.1em;text-transform:uppercase;
+  min-height:21px;text-align:center;
+  padding:3px 0;color:var(--dim);transition:color .3s;
+}
+.status.ok   { color:var(--c2); }
+.status.bad  { color:var(--c4); }
+.status.near { color:var(--c1); }
+
+/* ══ GRID ══════════════════════════════════════ */
+.grid {
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:7px;
+  width:100%;
+  margin-bottom:11px;
+}
+
+.tile {
+  aspect-ratio:1/.7;
+  border-radius:9px;
+  border:2px solid var(--brd);
+  background:var(--tile-bg);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:7px 5px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:clamp(.6rem,1.7vw,.78rem);
+  font-weight:700;
+  color:var(--txt);
+  cursor:pointer;
+  user-select:none;
+  transition:transform .18s,border-color .18s,background .18s,box-shadow .18s;
+  line-height:1.3;
+  box-shadow:var(--shad);
+}
+
+.tile:hover:not(.sel):not(.off) {
+  border-color:var(--c3);
+  background:rgba(59,130,246,.08);
+  transform:translateY(-2px) scale(1.02);
+}
+body.light .tile:hover:not(.sel):not(.off) { background:rgba(26,95,192,.06); }
+
+.tile.sel {
+  border-color:var(--c3);
+  background:var(--tile-sel);
+  transform:translateY(-2px) scale(1.03);
+  box-shadow:0 0 14px var(--g3);
+}
+
+.tile.off  { cursor:default;opacity:.38; }
+.tile.gone { opacity:0;pointer-events:none;transform:scale(.85);transition:opacity .3s,transform .3s; }
+
+.tile.shake { animation:shake .44s ease; }
+@keyframes shake {
+  0%,100%{transform:translateX(0)}
+  20%{transform:translateX(-5px)}
+  40%{transform:translateX(5px)}
+  60%{transform:translateX(-3px)}
+  80%{transform:translateX(3px)}
+}
+
+.tile.pop { animation:pop .52s cubic-bezier(.34,1.56,.64,1); }
+@keyframes pop {
+  0%{transform:scale(1)}
+  40%{transform:scale(1.13)}
+  70%{transform:scale(.97)}
+  100%{transform:scale(1)}
+}
+
+/* ══ CONTROLS ═════════════════════════════════ */
+.controls {
+  display:flex;gap:8px;flex-wrap:wrap;
+  justify-content:center;margin-bottom:10px;
+}
+
+.btn {
+  font-family:'JetBrains Mono',monospace;
+  font-size:.7rem;font-weight:700;
+  letter-spacing:.1em;text-transform:uppercase;
+  padding:10px 20px;border-radius:8px;
+  cursor:pointer;transition:all .22s;border:none;
+}
+.btn-go {
+  background:linear-gradient(135deg,var(--c3),var(--c4));
+  color:#fff;
+  box-shadow:0 0 16px rgba(59,130,246,.25);
+}
+.btn-go:hover        { transform:translateY(-2px);filter:brightness(1.1); }
+.btn-go:disabled     { opacity:.32;cursor:not-allowed;transform:none;filter:none; }
+.btn-sec {
+  background:var(--surf2);color:var(--dim);
+  border:1px solid var(--brd);
+}
+.btn-sec:hover { border-color:var(--dim);color:var(--txt); }
+
+/* ══ END PANEL ════════════════════════════════ */
+.endpanel {
+  display:none;
+  flex-direction:column;align-items:center;
+  gap:12px;
+  background:var(--surf);border:1px solid var(--brd);
+  border-radius:14px;padding:24px 26px;
+  width:100%;text-align:center;
+  animation:fin .4s ease;
+}
+.endpanel.show { display:flex; }
+@keyframes fin { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }
+
+.etitle { font-size:1.3rem;font-weight:800;letter-spacing:.05em; }
+.win  .etitle { color:var(--c2); }
+.lose .etitle { color:var(--c4); }
+.esub  { font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--dim);letter-spacing:.1em; }
+.escore {
+  font-family:'JetBrains Mono',monospace;
+  font-size:.96rem;font-weight:700;
+  color:var(--txt);
+  background:var(--surf2);border:1px solid var(--brd);
+  border-radius:7px;padding:9px 22px;
+}
+
+/* ══ HOW TO ════════════════════════════════════ */
+.howto {
+  background:var(--surf);border:1px solid var(--brd);
+  border-radius:11px;padding:13px 17px;
+  width:100%;margin-top:10px;
+}
+.howto summary {
+  font-family:'JetBrains Mono',monospace;
+  font-size:.66rem;font-weight:700;
+  letter-spacing:.16em;text-transform:uppercase;
+  color:var(--dim);cursor:pointer;
+  list-style:none;display:flex;align-items:center;gap:7px;
+}
+.howto summary::before { content:'▶';font-size:.54rem;transition:transform .2s; }
+.howto[open] summary::before { transform:rotate(90deg); }
+.hbody { margin-top:9px;display:grid;grid-template-columns:repeat(2,1fr);gap:7px; }
+.hitem { display:flex;gap:9px;align-items:flex-start;font-size:.76rem;color:var(--dim);line-height:1.5; }
+.hdot  { width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:5px; }
+
+/* ══ RESPONSIVE ═══════════════════════════════ */
+@media(max-width:500px) {
+  .grid  { gap:4px; }
+  .tile  { font-size:.56rem;padding:5px 3px;aspect-ratio:1/.82; }
+  .btn   { padding:8px 12px;font-size:.62rem; }
+  .hbody { grid-template-columns:1fr; }
+  .toolbar { justify-content:center; }
+}
+
+
+  /* ── Word Search CSS ── */
+
+</style>
+</head>
+<body>
+
+<!-- NAME REGISTRATION MODAL -->
+<div id="name-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:500;align-items:center;justify-content:center;">
+  <div style="background:var(--surface);border:1px solid var(--accent);padding:2rem 2rem 1.8rem;max-width:380px;width:90%;text-align:center;">
+    <div style="font-size:2rem;margin-bottom:.8rem;">⌨</div>
+    <div style="font-family:'Orbitron',monospace;font-size:1rem;color:var(--accent);margin-bottom:.4rem;letter-spacing:.1em;">YEAR 9 — KEYWORD ARENA</div>
+    <div style="font-family:'Share Tech Mono',monospace;font-size:.75rem;color:var(--text-dim);margin-bottom:1.4rem;line-height:1.6;">Enter your name to appear on the class leaderboard. Your teacher can see your score!</div>
+    <input id="name-modal-input" type="text" placeholder="Your first name…" maxlength="30"
+      style="width:100%;font-family:'Share Tech Mono',monospace;font-size:1.1rem;text-align:center;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:.6rem 1rem;outline:none;margin-bottom:.3rem;letter-spacing:.05em;"
+      oninput="this.value=this.value.replace(/[^a-zA-Z0-9 \-]/g,'')"
+      onkeydown="if(event.key==='Enter')submitName()"/>
+    <div id="name-modal-error" style="font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--red);min-height:1.2rem;margin-bottom:.6rem;"></div>
+    <button onclick="submitName()" style="width:100%;font-family:'Orbitron',monospace;font-size:.78rem;font-weight:700;letter-spacing:.1em;padding:.7rem;background:var(--accent);border:none;color:var(--bg);cursor:pointer;">ENTER ARENA →</button>
+    <div style="font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--dim);margin-top:.9rem;">Only your name and score are saved — nothing else</div>
+  </div>
+</div>
+
+<!-- NAME BAR (shown after registration) -->
+<div id="name-bar" style="background:var(--surface2);border-bottom:1px solid var(--border);padding:.4rem 1.2rem;display:flex;align-items:center;gap:.8rem;position:relative;z-index:20;flex-wrap:wrap;">
+  <span style="font-family:'Share Tech Mono',monospace;font-size:.7rem;color:var(--text-dim);">PLAYING AS:</span>
+  <span id="name-display" style="font-family:'Orbitron',monospace;font-size:.78rem;color:var(--accent);font-weight:700;"></span>
+  <button onclick="changeName()" style="font-family:'Share Tech Mono',monospace;font-size:.62rem;background:transparent;border:1px solid var(--border);color:var(--dim);padding:.2rem .55rem;cursor:pointer;margin-left:.3rem;">✏ CHANGE</button>
+  <span style="font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--text-dim);margin-left:auto;">Scores go to the class leaderboard 📡</span>
+</div>
+
+<header>
+  <h1>⌨ KS3 COMPUTER SCIENCE</h1>
+  <p class="sub">// CORBY BUSINESS ACADEMY — YEAR 9 REVISION //</p>
+  <div class="header-controls">
+    <button class="toggle-btn" id="btn-light" onclick="toggleLight()">☀ LIGHT</button>
+    <div class="cf-dropdown">
+      <button id="btn-cf" onclick="document.getElementById('cf-menu').classList.toggle('open')">🎨 COLOUR ▾</button>
+      <div class="cf-menu" id="cf-menu">
+        <button class="cf-opt" data-cf="none"   onclick="setColourFilter('none')">✕ Off</button>
+        <button class="cf-opt" data-cf="blue"   onclick="setColourFilter('blue')">🔵 Blue Tint</button>
+        <button class="cf-opt" data-cf="green"  onclick="setColourFilter('green')">🟢 Green Tint</button>
+        <button class="cf-opt" data-cf="yellow" onclick="setColourFilter('yellow')">🟡 Yellow Tint</button>
+        <button class="cf-opt" data-cf="pink"   onclick="setColourFilter('pink')">🩷 Pink Tint</button>
+      </div>
+    </div>
+    <button class="toggle-btn" id="btn-super" onclick="toggleSuperpower()">⚡ SUPERPOWER</button>
+  </div>
+</header>
+
+<nav>
+  <button class="nav-btn active" data-screen="home"        onclick="showScreen('home')">HOME</button>
+  <button class="nav-btn"        data-screen="wordle"      onclick="showScreen('wordle');initWordle()">WORDLE</button>
+  <button class="nav-btn"        data-screen="quiz"        onclick="showScreen('quiz');initQuiz()">QUIZ</button>
+  <button class="nav-btn"        data-screen="connect4"    onclick="showScreen('connect4');initConnect4()">CONNECT 4</button>
+  <button class="nav-btn"        data-screen="hangman"     onclick="showScreen('hangman');initHangman()">HANGMAN</button>
+  <button class="nav-btn"        data-screen="python"      onclick="showScreen('python');initChallenge('python')">🐍 PYTHON A</button>
+  <button class="nav-btn"        data-screen="javascript"  onclick="showScreen('javascript');initChallenge('javascript')">🐍 PYTHON B</button>
+  <button class="nav-btn"        data-screen="wordsearch"  onclick="showScreen('wordsearch')">🔍 WORD SEARCH</button>
+  <button class="nav-btn"        data-screen="onlyconnect" onclick="showScreen('onlyconnect')">🔗 ONLY CONNECT</button>
+  <button class="nav-btn"        data-screen="leaderboard" onclick="showScreen('leaderboard');renderLeaderboard()">🏆 BOARD</button>
+</nav>
+
+<!-- HOME -->
+<div id="home" class="screen active">
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:1rem;max-width:1060px;margin:0 auto;padding:1.5rem 1rem;">
+    <div class="game-card" onclick="showScreen('wordle');initWordle()">
+      <span class="card-icon">🟩</span>
+      <div class="card-title">CS WORDLE</div>
+      <div class="card-desc">Guess the Year 9 keyword in 6 tries using the definition clue.</div>
+      <div class="card-topic">▸ PYTHON · NETWORKS · SECURITY</div>
+    </div>
+    <div class="game-card" onclick="showScreen('quiz');initQuiz()">
+      <span class="card-icon">❓</span>
+      <div class="card-title">QUIZ MODE</div>
+      <div class="card-desc">10 random questions from the full Year 9 question bank.</div>
+      <div class="card-topic">▸ ALL YEAR 9 TOPICS</div>
+    </div>
+    <div class="game-card" onclick="showScreen('connect4');initConnect4()">
+      <span class="card-icon">🔴</span>
+      <div class="card-title">CONNECT 4</div>
+      <div class="card-desc">2-player. Answer a question to place your piece.</div>
+      <div class="card-topic">▸ VERSUS MODE</div>
+    </div>
+    <div class="game-card" onclick="showScreen('hangman');initHangman()">
+      <span class="card-icon">🪢</span>
+      <div class="card-title">HANGMAN</div>
+      <div class="card-desc">Guess the Year 9 keyword letter by letter.</div>
+      <div class="card-topic">▸ KEYWORD RECALL</div>
+    </div>
+    <div class="game-card" onclick="showScreen('python');initChallenge('python')" style="border-top:3px solid var(--green)">
+      <span class="card-icon">🐍</span>
+      <div class="card-title" style="color:var(--green)">PYTHON — PART A</div>
+      <div class="card-desc">Theory questions + code tasks on core Python concepts.</div>
+      <div class="card-topic" style="color:#3572A5">▸ VARIABLES · LOOPS · FUNCTIONS</div>
+    </div>
+    <div class="game-card" onclick="showScreen('javascript');initChallenge('javascript')" style="border-top:3px solid var(--green)">
+      <span class="card-icon">🐍</span>
+      <div class="card-title" style="color:var(--green)">PYTHON — PART B</div>
+      <div class="card-desc">Advanced Python — dicts, classes, recursion + more.</div>
+      <div class="card-topic" style="color:#3572A5">▸ CLASSES · FILE I/O · COMPREHENSIONS</div>
+    </div>
+    <div class="game-card" onclick="showScreen('wordsearch')">
+      <span class="card-icon">🔍</span>
+      <div class="card-title">WORD SEARCH</div>
+      <div class="card-desc">Find hidden CS keywords. Easy, Medium or Hard mode.</div>
+      <div class="card-topic">▸ 58 CS KEYWORDS · 3 DIFFICULTIES</div>
+    </div>
+    <div class="game-card" onclick="showScreen('onlyconnect')">
+      <span class="card-icon">🔗</span>
+      <div class="card-title">ONLY CONNECT</div>
+      <div class="card-desc">Group four CS terms that share a hidden connection.</div>
+      <div class="card-topic">▸ 5 PUZZLES · 4 CONNECTIONS EACH</div>
+    </div>
+  </div>
+</div>
+
+<!-- WORDLE -->
+<div id="wordle" class="screen">
+  <div class="section-header"><h2>CS WORDLE</h2><p>// guess the hidden year 9 keyword //</p></div>
+  <div id="wordle-category"></div>
+  <div id="wordle-hint"></div>
+  <div id="wordle-grid"></div>
+  <div id="wordle-msg" class="msg"></div>
+  <div id="wordle-input-row">
+    <input id="wordle-input" maxlength="20" placeholder="TYPE GUESS…" autocomplete="off"/>
+    <button class="btn" onclick="wordleSubmit()">ENTER</button>
+  </div>
+  <div id="wordle-keyboard"></div>
+  <div class="flex-center" style="margin-top:1rem"><button class="btn accent2" onclick="initWordle()">NEW WORD</button></div>
+</div>
+
+<!-- QUIZ -->
+<div id="quiz" class="screen">
+  <div class="section-header"><h2>QUIZ MODE</h2><p>// 10 random questions per round //</p></div>
+  <div id="quiz-game">
+    <div class="quiz-meta">
+      <div>QUESTION <span id="q-num">1</span>/10</div>
+      <div>SCORE <span id="q-score">0</span></div>
+      <div>STREAK <span id="q-streak">0</span> 🔥</div>
+    </div>
+    <div class="quiz-progress"><div class="quiz-progress-bar" id="q-bar" style="width:0%"></div></div>
+    <div id="quiz-category-tag"></div>
+    <div id="quiz-question">Loading…</div>
+    <div class="quiz-options" id="quiz-options"></div>
+    <div id="quiz-explanation"></div>
+    <div class="flex-center"><button class="btn" id="quiz-next-btn" onclick="quizNext()" style="display:none">NEXT →</button></div>
+  </div>
+  <div id="quiz-end" style="display:none">
+    <div class="quiz-score-card">
+      <div class="big-score" id="final-score"></div>
+      <p id="final-msg" style="font-family:'Share Tech Mono',monospace;color:var(--text-dim);margin-bottom:1.2rem"></p>
+      <button class="btn" onclick="initQuiz()">PLAY AGAIN</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONNECT 4 -->
+<div id="connect4" class="screen">
+  <div class="section-header"><h2>CONNECT 4</h2><p>// answer correctly to place your piece //</p></div>
+  <div class="c4-info">
+    <div class="c4-player p1" id="c4-p1-label">🔵 PLAYER 1 <span>0</span></div>
+    <button class="btn" onclick="initConnect4()">NEW GAME</button>
+    <div class="c4-player p2" id="c4-p2-label">PLAYER 2 <span>0</span> 🟠</div>
+  </div>
+  <div id="c4-turn-msg"></div>
+  <div id="c4-col-btns" style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:2px;"></div>
+  <div id="c4-board"></div>
+  <div id="c4-question-panel">
+    <h3>⚡ ANSWER TO PLACE YOUR PIECE — COLUMN <span id="c4-col-num"></span></h3>
+    <div id="c4-q-text"></div>
+    <div class="c4-options" id="c4-options"></div>
+    <div id="c4-q-msg" class="msg" style="display:none"></div>
+  </div>
+  <div id="c4-msg" class="msg" style="display:none"></div>
+</div>
+
+<!-- HANGMAN -->
+<div id="hangman" class="screen">
+  <div class="section-header"><h2>HANGMAN</h2><p>// guess the year 9 cs keyword //</p></div>
+  <div class="hangman-layout">
+    <div>
+      <svg id="hangman-svg" viewBox="0 0 160 180" xmlns="http://www.w3.org/2000/svg">
+        <line x1="20" y1="170" x2="140" y2="170" stroke="#1e3a5f" stroke-width="3"/>
+        <line x1="60" y1="170" x2="60" y2="10"  stroke="#1e3a5f" stroke-width="3"/>
+        <line x1="60" y1="10"  x2="110" y2="10"  stroke="#1e3a5f" stroke-width="3"/>
+        <line x1="110" y1="10" x2="110" y2="30"  stroke="#1e3a5f" stroke-width="3"/>
+        <circle id="hm-head" class="hm-part" cx="110" cy="45" r="15" stroke="#00d4ff" stroke-width="2.5" fill="none"/>
+        <line   id="hm-body" class="hm-part" x1="110" y1="60"  x2="110" y2="110" stroke="#00d4ff" stroke-width="2.5"/>
+        <line   id="hm-larm" class="hm-part" x1="110" y1="75"  x2="85"  y2="100" stroke="#00d4ff" stroke-width="2.5"/>
+        <line   id="hm-rarm" class="hm-part" x1="110" y1="75"  x2="135" y2="100" stroke="#00d4ff" stroke-width="2.5"/>
+        <line   id="hm-lleg" class="hm-part" x1="110" y1="110" x2="85"  y2="140" stroke="#00d4ff" stroke-width="2.5"/>
+        <line   id="hm-rleg" class="hm-part" x1="110" y1="110" x2="135" y2="140" stroke="#00d4ff" stroke-width="2.5"/>
+      </svg>
+    </div>
+    <div>
+      <div id="hm-category"></div>
+      <div id="hm-hint"></div>
+      <div id="hm-word-display"></div>
+      <div id="hm-lives"></div>
+      <div id="hm-guessed"></div>
+      <div id="hm-keyboard"></div>
+      <div id="hm-msg" class="msg" style="display:none"></div>
+      <div class="flex-center" style="margin-top:.7rem"><button class="btn accent2" onclick="initHangman()">NEW WORD</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- PYTHON CHALLENGES -->
+<div id="python" class="screen">
+  <div class="challenge-screen" id="py-screen">
+    <div class="section-header"><h2>🐍 PYTHON CHALLENGES — PART A</h2><p>// theory questions + code tasks: loops, functions, lists + more //</p></div>
+    <div id="py-game">
+      <div class="challenge-header">
+        <div class="ch-meta">TASK <span id="py-num">1</span>/10 &nbsp;·&nbsp; SCORE <span id="py-score">0</span></div>
+        <div class="ch-meta">STREAK <span id="py-streak">0</span> 🔥</div>
+      </div>
+      <div class="ch-progress-bar-wrap"><div class="ch-progress-bar" id="py-bar" style="width:0%"></div></div>
+      <div class="challenge-card">
+        <div class="ch-topic" id="py-topic"></div>
+        <div class="ch-question" id="py-question">Loading…</div>
+        <div class="code-block" id="py-code" style="display:none"></div>
+        <div class="ch-options" id="py-options"></div>
+        <div id="py-explanation" style="display:none"></div>
+      </div>
+      <div class="flex-center"><button class="btn" id="py-next-btn" onclick="chNext('python')" style="display:none">NEXT →</button></div>
+    </div>
+    <div id="py-end" style="display:none">
+      <div class="ch-score-card">
+        <div class="big-score" id="py-final-score"></div>
+        <p id="py-final-msg" style="font-family:'Share Tech Mono',monospace;color:var(--text-dim);margin-bottom:1.2rem"></p>
+        <button class="btn green" onclick="initChallenge('python')">PLAY AGAIN</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PYTHON CHALLENGES PART B -->
+<div id="javascript" class="screen">
+  <div class="challenge-screen" id="js-screen">
+    <div class="section-header"><h2>🐍 PYTHON CHALLENGES — PART B</h2><p>// advanced python: dictionaries, classes, recursion + more //</p></div>
+    <div id="js-game">
+      <div class="challenge-header">
+        <div class="ch-meta">TASK <span id="js-num">1</span>/10 &nbsp;·&nbsp; SCORE <span id="js-score">0</span></div>
+        <div class="ch-meta">STREAK <span id="js-streak">0</span> 🔥</div>
+      </div>
+      <div class="ch-progress-bar-wrap"><div class="ch-progress-bar" id="js-bar" style="width:0%"></div></div>
+      <div class="challenge-card">
+        <div class="ch-topic" id="js-topic"></div>
+        <div class="ch-question" id="js-question">Loading…</div>
+        <div class="code-block" id="js-code" style="display:none"></div>
+        <div class="ch-options" id="js-options"></div>
+        <div id="js-explanation" style="display:none"></div>
+      </div>
+      <div class="flex-center"><button class="btn" id="js-next-btn" onclick="chNext('javascript')" style="display:none">NEXT →</button></div>
+    </div>
+    <div id="js-end" style="display:none">
+      <div class="ch-score-card">
+        <div class="big-score" id="js-final-score"></div>
+        <p id="js-final-msg" style="font-family:'Share Tech Mono',monospace;color:var(--text-dim);margin-bottom:1.2rem"></p>
+        <button class="btn green" onclick="initChallenge('javascript')">PLAY AGAIN</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- WORD SEARCH -->
+<div id="wordsearch" class="screen">
+  <div class="section-header"><h2>🔍 CS WORD SEARCH</h2><p>// find the hidden computer science keywords //</p></div>
+<div class="main">
+  <div class="grid-wrap">
+    <div class="grid-status">
+      <div>FOUND <span id="found-count">0</span> / <span id="total-count">0</span></div>
+      <div>TIME <span id="timer-display">00:00</span></div>
+    </div>
+    <div id="ws-grid"></div>
+    <div class="dir-legend">↔ ↕ ↗ ↘ — words hidden in all 8 directions</div>
+  </div>
+
+  <div class="sidebar">
+    <div class="words-panel">
+      <div class="words-title">
+        FIND THESE WORDS
+        <span id="words-remaining">0 remaining</span>
+      </div>
+      <div class="word-list" id="word-list"></div>
+    </div>
+
+    <div class="hint-panel">
+      <div class="hint-title">💡 DEFINITION</div>
+      <div id="hint-text">Hover over a word in the list to see its definition.</div>
+    </div>
+
+    <div class="stats-panel">
+      <div class="stat"><div class="stat-v" id="st-found">0</div><div class="stat-l">Found</div></div>
+      <div class="stat"><div class="stat-v" id="st-left">0</div><div class="stat-l">Remaining</div></div>
+    </div>
+
+    <div class="lb-panel">
+      <div class="lb-title">
+        🏆 LEADERBOARD
+        <button onclick="clearLB()">CLEAR</button>
+      </div>
+      <div id="lb-entries"><div class="lb-empty">Complete a puzzle to appear here!</div></div>
+    </div>
+  </div>
+</div>
+
+<div id="ws-win-overlay">
+  <div class="win-box">
+    <span class="win-emoji">🎉</span>
+    <div class="win-title">SOLVED!</div>
+    <div class="win-time">Completed in <span id="win-time-val">00:00</span></div>
+    <input class="win-input" id="winner-name" placeholder="Enter your name for the leaderboard…" maxlength="25"/>
+    <button class="play-again" onclick="submitScore()">SAVE &amp; PLAY AGAIN →</button>
+    <div style="margin-top:.6rem">
+      <button onclick="newGame()" style="font-family:'Share Tech Mono',monospace;font-size:.65rem;background:transparent;border:none;color:var(--dim);cursor:pointer;text-decoration:underline;">Skip — play again without saving</button>
+    </div>
+  </div>
+</div>
+
+
+</div>
+
+<!-- ONLY CONNECT -->
+<div id="onlyconnect" class="screen">
+  <div class="section-header"><h2>🔗 ONLY CONNECT</h2><p>// group four cs terms that share a hidden connection //</p></div>
+<div class="psel" id="psel"></div>
+
+<!-- DIFFICULTY KEY -->
+<div class="drow">
+  <div class="ditem"><div class="ddot" style="background:var(--c1)"></div>Straightforward</div>
+  <div class="ditem"><div class="ddot" style="background:var(--c2)"></div>Medium</div>
+  <div class="ditem"><div class="ddot" style="background:var(--c3)"></div>Tricky</div>
+  <div class="ditem"><div class="ddot" style="background:var(--c4)"></div>Fiendish</div>
+</div>
+
+<!-- LIVES -->
+<div class="lives-row">
+  <div class="llbl">Lives</div>
+  <div id="livesBox" style="display:flex;gap:7px"></div>
+</div>
+
+<!-- SOLVED -->
+<div class="sbgroup" id="sbgroup"></div>
+
+<!-- STATUS -->
+<div class="status" id="status">Select four tiles you think are connected</div>
+
+<!-- GRID -->
+<div class="grid" id="grid"></div>
+
+<!-- CONTROLS -->
+<div class="controls">
+  <button class="btn btn-sec" onclick="desel()">Deselect All</button>
+  <button class="btn btn-sec" id="shufBtn" onclick="doShuffle()">Shuffle</button>
+  <button class="btn btn-go"  id="goBtn"   onclick="doSubmit()" disabled>Submit &#8594;</button>
+</div>
+
+<!-- END PANEL -->
+<div class="endpanel" id="endPanel">
+  <div class="etitle" id="etitle">Well done!</div>
+  <div class="esub"   id="esub">All groups found</div>
+  <div class="escore" id="escore"></div>
+  <button class="btn btn-go" onclick="restart()" style="margin-top:4px">Play Again &#8635;</button>
+</div>
+
+<!-- HOW TO PLAY -->
+<details class="howto">
+  <summary>How to play</summary>
+  <div class="hbody">
+    <div class="hitem"><div class="hdot" style="background:var(--c3)"></div><span>Click 4 tiles you think share a hidden connection</span></div>
+    <div class="hitem"><div class="hdot" style="background:var(--c2)"></div><span>Hit Submit &#8212; if correct the group is revealed</span></div>
+    <div class="hitem"><div class="hdot" style="background:var(--c1)"></div><span>You have 4 lives &#8212; each wrong guess costs one</span></div>
+    <div class="hitem"><div class="hdot" style="background:var(--c4)"></div><span>Tiles may look related &#8212; beware red herrings!</span></div>
+  </div>
+</details>
+
+</div>
+
+
+</div>
+
+<!-- LEADERBOARD -->
+<div id="leaderboard" class="screen">
+  <div class="section-header"><h2>🏆 YOUR SCORES</h2><p>// scores from this session //</p></div>
+  <div style="max-width:500px;margin:0 auto;">
+    <div id="lb-list"></div>
+    <div style="text-align:center;margin-top:1.2rem;">
+      <button class="btn accent2" onclick="if(confirm('Clear all scores?')){store.set('y9arena_scores','[]');renderLeaderboard();}">🗑 CLEAR</button>
+    </div>
+    <div style="margin-top:2rem;padding:1rem;background:var(--surface2);border:1px dashed var(--border);text-align:center;">
+      <div style="font-family:'Share Tech Mono',monospace;font-size:.7rem;color:var(--text-dim);line-height:1.8;">
+        📡 Scores are sent to the teacher dashboard automatically<br>Ask your teacher to show the class leaderboard!
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>CORBY BUSINESS ACADEMY — COMPUTER SCIENCE DEPARTMENT // KS3 YEAR 9 REVISION</footer>
+
+<script>
+
+// ═══════════════════════════════════════════════════════════
+// THEME & ACCESSIBILITY
+// ═══════════════════════════════════════════════════════════
+const store = {
+  get(k)  { try{ return localStorage.getItem(k); }    catch(e){ return null; } },
+  set(k,v){ try{ localStorage.setItem(k,v); }         catch(e){} },
+  del(k)  { try{ localStorage.removeItem(k); }        catch(e){} },
+};
+
+const GS_URL = 'https://script.google.com/macros/s/AKfycby_AgNpKlK9wSLWmIo3Rz1SKpnQUIB6TrIoG7licBCAJsi52251bwM9eG47qtb1LjzR5g/exec';
+
+let currentFilter  = store.get('y9arena_filter') || 'none';
+let isLight        = store.get('y9arena_light')  === '1';
+let isSuperpower   = store.get('y9arena_super')  === '1';
+
+const CF_CLASSES = ['cf-blue','cf-green','cf-yellow','cf-pink'];
+
+function applyAll() {
+  document.body.classList.toggle('light',      isLight);
+  document.body.classList.toggle('dyslexia',   isSuperpower);
+  document.body.classList.toggle('superpower', isSuperpower); // OC uses 'superpower'
+
+  const btnL = document.getElementById('btn-light');
+  const btnS = document.getElementById('btn-super');
+  if (btnL) btnL.classList.toggle('active-light', isLight);
+  if (btnS) {
+    btnS.classList.toggle('active-super', isSuperpower);
+    btnS.textContent = isSuperpower ? '⚡ SUPERPOWER ON' : '⚡ SUPERPOWER';
+  }
+
+  // Remove all colour filter classes then re-add if set
+  CF_CLASSES.forEach(cf => document.body.classList.remove(cf));
+  document.querySelectorAll('.cf-btn').forEach(b => b.classList.remove('cf-active'));
+  if (currentFilter !== 'none') {
+    document.body.classList.add('cf-' + currentFilter);
+    const cfBtn = document.querySelector('[data-cf="' + currentFilter + '"]');
+    if (cfBtn) cfBtn.classList.add('cf-active');
+  }
+  // Also update OC fdBtn label
+  const fdBtn = document.getElementById('fdBtn');
+  if (fdBtn) {
+    const lbl = currentFilter !== 'none'
+      ? currentFilter.charAt(0).toUpperCase() + currentFilter.slice(1)
+      : 'Colour Filter';
+    fdBtn.textContent = 'Colour Filter: ' + lbl + ' ▾';
+  }
+}
+
+function toggleLight() {
+  isLight = !isLight;
+  store.set('y9arena_light', isLight ? '1' : '0');
+  applyAll();
+}
+function toggleSuperpower() {
+  isSuperpower = !isSuperpower;
+  store.set('y9arena_super', isSuperpower ? '1' : '0');
+  applyAll();
+}
+function setColourFilter(f) {
+  currentFilter = (currentFilter === f) ? 'none' : f;
+  store.set('y9arena_filter', currentFilter);
+  applyAll();
+  // Close OC dropdown if open
+  const fdMenu = document.getElementById('fdMenu');
+  if (fdMenu) fdMenu.style.display = 'none';
+}
+
+// OC compat shims
+function toggleSP() { toggleSuperpower(); }
+function toggleLight_oc() { toggleLight(); }
+function setCF(cls) {
+  const f = cls ? cls.replace('cf-','') : 'none';
+  setColourFilter(f);
+}
+
+applyAll();
+
+
+
+// ═══════════════════════════════════════════════════════════
+// SCORES
+// ═══════════════════════════════════════════════════════════
+let playerName = store.get('y9arena_player_name') || '';
+
+function submitName() {
+  const inp = document.getElementById('name-modal-input');
+  const err = document.getElementById('name-modal-error');
+  const name = inp ? inp.value.trim() : '';
+  if (!name) { if(err) err.textContent = '⚠ Please enter your name'; return; }
+  if (name.length < 2) { if(err) err.textContent = '⚠ Must be at least 2 characters'; return; }
+  playerName = name;
+  store.set('y9arena_player_name', name);
+  const nd = document.getElementById('name-display');
+  if (nd) nd.textContent = name;
+  const modal = document.getElementById('name-modal');
+  if (modal) modal.style.display = 'none';
+}
+
+function changeName() {
+  const inp   = document.getElementById('name-modal-input');
+  const err   = document.getElementById('name-modal-error');
+  const modal = document.getElementById('name-modal');
+  if (inp) inp.value = playerName;
+  if (err) err.textContent = '';
+  if (modal) { modal.style.display = 'flex'; setTimeout(()=>inp&&inp.focus(),50); }
+}
+
+function checkName() {
+  if (!playerName) {
+    const inp   = document.getElementById('name-modal-input');
+    const err   = document.getElementById('name-modal-error');
+    const modal = document.getElementById('name-modal');
+    if (inp) inp.value = '';
+    if (err) err.textContent = '';
+    if (modal) { modal.style.display = 'flex'; setTimeout(()=>inp&&inp.focus(),50); }
+    return false;
+  }
+  return true;
+}
+
+function saveScore(entry) {
+  entry.ts = Date.now();
+  const all = JSON.parse(store.get('y9arena_scores') || '[]');
+  all.push(entry);
+  store.set('y9arena_scores', JSON.stringify(all));
+  if (GS_URL) {
+    const p = new URLSearchParams({
+      action:'addScore', year:'Y9',
+      name: entry.name || 'Anonymous',
+      game: entry.game || '',
+      score: entry.score || 0,
+      detail: entry.detail || '',
+      date: new Date().toLocaleString('en-GB')
+    });
+    try {
+      const s = document.createElement('script');
+      s.src = GS_URL + '?' + p.toString();
+      s.onload = s.onerror = () => { if(s.parentNode) s.parentNode.removeChild(s); };
+      document.head.appendChild(s);
+    } catch(e) {}
+  }
+  renderLeaderboard();
+}
+
+function renderLeaderboard() {
+  const el = document.getElementById('lb-list');
+  if (!el) return;
+  const all = JSON.parse(store.get('y9arena_scores') || '[]');
+  if (!all.length) {
+    el.innerHTML = '<div style="text-align:center;padding:1.5rem;color:var(--text-dim);font-family:Share Tech Mono,monospace;font-size:.78rem;">Play some games to see your scores here!</div>';
+    return;
+  }
+  el.innerHTML = [...all].reverse().slice(0,20).map(e => `
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:.5rem .8rem;margin-bottom:3px;background:var(--surface2);border:1px solid var(--border);">
+      <div>
+        <div style="font-family:'Orbitron',monospace;font-size:.68rem;color:var(--accent);">${e.game}</div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--text-dim);">${e.detail||''}</div>
+      </div>
+      <div style="font-family:'Orbitron',monospace;font-size:1rem;font-weight:700;color:var(--yellow);">${e.score}</div>
+    </div>`).join('');
+}
+
+function setMsg(id,text,type){ const el=document.getElementById(id); if(el){el.textContent=text;el.className='msg '+(type||'');} }
+
+
+// ─── NAV ───────────────────────────────────────────────────
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  const el = document.getElementById(id);
+  if (el) el.classList.add('active');
+  document.querySelectorAll('[data-screen="'+id+'"]').forEach(b => b.classList.add('active'));
+  if (id === 'wordsearch') { wsRenderLB(); }
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('.cf-dropdown')) {
+    const m = document.getElementById('cf-menu');
+    if (m) m.classList.remove('open');
+  }
+});
+
+// ─── YEAR 9 DATA ────────────────────────────────────────────
+const KEYWORDS = [
+  { word:"FUNCTION",   hint:"A reusable named block of code that performs a task", category:"Programming" },
+  { word:"PARAMETER",  hint:"A variable passed into a function when it is called", category:"Programming" },
+  { word:"RETURN",     hint:"The keyword that sends a value back from a function", category:"Programming" },
+  { word:"LIST",       hint:"An ordered collection of items stored under one variable name", category:"Python" },
+  { word:"LOOP",       hint:"A block of code that repeats — for or while", category:"Programming" },
+  { word:"BOOLEAN",    hint:"A True or False value", category:"Programming" },
+  { word:"STRING",     hint:"A sequence of characters — text — in programming", category:"Programming" },
+  { word:"INTEGER",    hint:"A whole number with no decimal point", category:"Programming" },
+  { word:"VARIABLE",   hint:"A named container that stores a value", category:"Programming" },
+  { word:"SYNTAX",     hint:"The rules that define the structure of a programming language", category:"Programming" },
+  { word:"DEBUG",      hint:"The process of finding and fixing errors in code", category:"Programming" },
+  { word:"COMMENT",    hint:"A note in code ignored by the computer — # in Python, // in JS", category:"Programming" },
+  { word:"ARRAY",      hint:"An ordered collection of items — called a list in Python", category:"JavaScript" },
+  { word:"OBJECT",     hint:"A data structure in JS that stores key-value pairs", category:"JavaScript" },
+  { word:"METHOD",     hint:"A function that belongs to an object or class", category:"Programming" },
+  { word:"CLASS",      hint:"A blueprint for creating objects in Object-Oriented Programming", category:"Programming" },
+  { word:"INHERIT",    hint:"When a child class takes properties from a parent class", category:"Programming" },
+  { word:"QUERY",      hint:"A request made to a database to retrieve or change data", category:"Databases" },
+  { word:"TABLE",      hint:"A structure in a database that organises data into rows and columns", category:"Databases" },
+  { word:"SELECT",     hint:"The SQL keyword used to retrieve data from a table", category:"Databases" },
+  { word:"NETWORK",    hint:"Two or more computers connected together to share data", category:"Networks" },
+  { word:"PROTOCOL",   hint:"A set of rules computers follow to communicate", category:"Networks" },
+  { word:"FIREWALL",   hint:"A system that monitors and filters network traffic", category:"Security" },
+  { word:"ENCRYPT",    hint:"To scramble data so only authorised people can read it", category:"Security" },
+  { word:"PHISHING",   hint:"A trick email or website that tries to steal your information", category:"Security" },
+  { word:"ALGORITHM",  hint:"A step-by-step set of instructions to solve a problem", category:"Algorithms" },
+  { word:"ITERATION",  hint:"Repeating a block of code — looping", category:"Algorithms" },
+  { word:"SELECTION",  hint:"Choosing a path through code using IF statements", category:"Algorithms" },
+  { word:"RECURSION",  hint:"When a function calls itself to solve a smaller version of a problem", category:"Algorithms" },
+  { word:"SORT",       hint:"Arranging data into order — bubble sort, merge sort etc.", category:"Algorithms" },
+];
+
+const QUIZ_QUESTIONS = [
+  // ── PROGRAMMING CONCEPTS ──
+  { q:"What is a function in programming?", opts:["A type of variable","A named reusable block of code that performs a task","A data structure","A loop type"], ans:1, cat:"Programming", exp:"Functions let you write code once and reuse it. They can take parameters and return values." },
+  { q:"What does 'return' do in a function?", opts:["Ends the program","Repeats the function","Sends a value back to the caller","Prints to the screen"], ans:2, cat:"Programming", exp:"The return statement exits the function and passes a value back to wherever it was called." },
+  { q:"What is a parameter?", opts:["A type of loop","A value passed into a function","A data structure","An error type"], ans:1, cat:"Programming", exp:"Parameters are variables that receive values when a function is called. Example: def greet(name)." },
+  { q:"What is the difference between a parameter and an argument?", opts:["They are the same","A parameter is the actual value; argument is the placeholder","A parameter is the placeholder in the definition; argument is the actual value passed","Arguments are only used in Python"], ans:2, cat:"Programming", exp:"Parameter = the variable in the function definition. Argument = the actual value passed when calling it." },
+  { q:"What is a Boolean?", opts:["A decimal number","A text string","A list","A True or False value"], ans:3, cat:"Programming", exp:"Boolean values are True or False — the basis of all conditions and logic in programming." },
+  { q:"What does 'syntax error' mean?", opts:["The program ran out of memory","The code broke a rule of the language's grammar","The output is wrong","A network error"], ans:1, cat:"Programming", exp:"A syntax error means the code doesn't follow the language's rules — like missing a colon in Python." },
+  { q:"What is an integer data type?", opts:["Text data","A decimal number","A True/False value","A whole number with no decimal point"], ans:3, cat:"Programming", exp:"Integer (int) stores whole numbers. Float stores decimals. String stores text." },
+  { q:"What is a string?", opts:["A type of loop","A whole number","A sequence of characters — text data","A True or False value"], ans:2, cat:"Programming", exp:"Strings store text. In Python: name = 'Alice'. Strings are enclosed in quotes." },
+  { q:"What is a comment in code?", opts:["An error message","A line of code that runs first","A note for humans, ignored by the computer","A variable name"], ans:2, cat:"Programming", exp:"Comments explain code to humans. Python uses #. JavaScript uses // for single-line comments." },
+  { q:"What does 'debugging' mean?", opts:["Writing new code","Compressing files","Running code faster","Finding and fixing errors in a program"], ans:3, cat:"Programming", exp:"Debugging is identifying and removing bugs (errors) from code." },
+  // ── PYTHON ──
+  { q:"What does print() do in Python?", opts:["Stores a value","Sends output to the screen","Creates a function","Starts a loop"], ans:1, cat:"Python", exp:"print() outputs text or values to the console. Example: print('Hello') displays Hello." },
+  { q:"How do you start a for loop in Python?", opts:["for i = 1 to 10","loop i in range(10)","for i in range(10):","foreach i in 10"], ans:2, cat:"Python", exp:"Python for loops use: for variable in range(n): — the colon and indentation are essential." },
+  { q:"What does range(5) produce in Python?", opts:["1, 2, 3, 4, 5","0, 1, 2, 3, 4, 5","0, 1, 2, 3, 4","5, 4, 3, 2, 1"], ans:2, cat:"Python", exp:"range(5) produces 0, 1, 2, 3, 4 — it starts at 0 and goes up to (but not including) 5." },
+  { q:"What does len() do in Python?", opts:["Deletes a list item","Sorts a list","Returns the number of items in a list or characters in a string","Converts to integer"], ans:2, cat:"Python", exp:"len() returns the length — number of characters in a string or items in a list." },
+  { q:"How do you define a function in Python?", opts:["function myFunc():","def myFunc():","func myFunc():","define myFunc():"], ans:1, cat:"Python", exp:"Python functions use the def keyword. Example: def greet(): — followed by an indented body." },
+  { q:"What does append() do to a Python list?", opts:["Removes the last item","Sorts the list","Returns the list length","Adds an item to the end"], ans:3, cat:"Python", exp:"list.append(item) adds an item to the end of a list." },
+  { q:"How do you get user input in Python?", opts:["get()","read()","input()","scan()"], ans:2, cat:"Python", exp:"input() reads a line from the user. It always returns a string, so cast with int() if needed." },
+  { q:"What is the output of: print(10 % 3) in Python?", opts:["3","0","1","3.33"], ans:2, cat:"Python", exp:"% is the modulus (remainder) operator. 10 divided by 3 = 3 remainder 1, so 10 % 3 = 1." },
+  { q:"What does int('42') do in Python?", opts:["Prints 42","Raises an error","Creates a list","Converts the string '42' to the integer 42"], ans:3, cat:"Python", exp:"int() converts a string to an integer. Useful when processing input() which returns strings." },
+  { q:"How do you check a condition in Python?", opts:["check x > 5:","if (x > 5) {","if x > 5:","when x > 5 then"], ans:2, cat:"Python", exp:"Python if statements use: if condition: — no parentheses required, colon is essential." },
+  { q:"What is a while loop?", opts:["Runs once and stops","Runs for a fixed number of iterations","Repeats while a condition is True","Runs only if a function is defined"], ans:2, cat:"Python", exp:"A while loop repeats as long as its condition is True. Beware infinite loops!" },
+  { q:"What is indexing in a Python list?", opts:["Sorting the list","Searching for an item","Accessing a specific item by its position","Adding an item"], ans:2, cat:"Python", exp:"Lists are zero-indexed. my_list[0] is the first item, my_list[1] the second, etc." },
+  // ── JAVASCRIPT ──
+  { q:"How do you declare a variable in modern JavaScript?", opts:["variable x = 5","dim x = 5","let x = 5 or const x = 5","int x = 5"], ans:2, cat:"JavaScript", exp:"Modern JS uses let (changeable) or const (fixed). Avoid var in new code." },
+  { q:"What does console.log() do in JavaScript?", opts:["Stores data","Creates an alert","Sends data to a server","Outputs a value to the browser console"], ans:3, cat:"JavaScript", exp:"console.log() prints to the browser's developer console — essential for debugging." },
+  { q:"What is the difference between == and === in JavaScript?", opts:["They are the same","=== checks type and value; == only checks value","== is faster","=== is only for numbers"], ans:1, cat:"JavaScript", exp:"=== is strict equality (checks both value and type). == does type coercion, which can cause bugs." },
+  { q:"What does typeof return for typeof 'hello' in JavaScript?", opts:["string","text","char","word"], ans:0, cat:"JavaScript", exp:"typeof returns a string describing the data type: 'string', 'number', 'boolean', 'undefined' etc." },
+  { q:"How do you write a single-line comment in JavaScript?", opts:["# comment","-- comment","/* comment */","// comment"], ans:3, cat:"JavaScript", exp:"JavaScript uses // for single-line comments. /* */ for multi-line block comments." },
+  { q:"What does .length do on a JavaScript array?", opts:["Sorts it","Removes items","Returns how many items are in the array","Reverses the array"], ans:2, cat:"JavaScript", exp:"array.length returns the number of elements. It also works on strings (character count)." },
+  { q:"How do you add an item to the end of a JavaScript array?", opts:["array.add(item)","array.append(item)","array.insert(item)","array.push(item)"], ans:3, cat:"JavaScript", exp:"push() adds one or more items to the end. pop() removes from the end." },
+  { q:"What does a JavaScript function look like?", opts:["def myFunc() {}","function myFunc() {}","func myFunc() {}","define myFunc() {}"], ans:1, cat:"JavaScript", exp:"JavaScript functions use the function keyword. Example: function greet() { console.log('Hi'); }" },
+  { q:"What is the output of: console.log(2 ** 3) in JavaScript?", opts:["6","8","9","5"], ans:1, cat:"JavaScript", exp:"** is the exponentiation operator. 2 ** 3 = 2 × 2 × 2 = 8." },
+  { q:"What is an event listener in JavaScript?", opts:["A variable that listens for changes","A function that waits for and responds to user actions","A type of loop","A server connection"], ans:1, cat:"JavaScript", exp:"Event listeners (addEventListener) let code respond to clicks, key presses, form submissions etc." },
+  // ── DATABASES ──
+  { q:"What does SQL stand for?", opts:["Sequential Query Language","Structured Query Language","System Queue Logic","Software Query Line"], ans:1, cat:"Databases", exp:"SQL (Structured Query Language) is used to create, read, update and delete database records." },
+  { q:"Which SQL keyword retrieves data from a table?", opts:["GET","FETCH","FIND","SELECT"], ans:3, cat:"Databases", exp:"SELECT is used to retrieve data. Example: SELECT * FROM students;" },
+  { q:"What does WHERE do in SQL?", opts:["Sorts results","Joins tables","Filters records to those matching a condition","Deletes records"], ans:2, cat:"Databases", exp:"WHERE filters results. Example: SELECT * FROM students WHERE name = 'Alice';" },
+  { q:"What is a primary key?", opts:["The most important column","A column that sorts data","A column linking to another table","A unique identifier for each record in a table"], ans:3, cat:"Databases", exp:"Every table should have a primary key — a unique value (often an ID number) identifying each row." },
+  { q:"What does ORDER BY do in SQL?", opts:["Filters records","Deletes records","Updates records","Sorts the results by a specified column"], ans:3, cat:"Databases", exp:"ORDER BY sorts results. Add ASC for ascending (default) or DESC for descending order." },
+  // ── NETWORKS & SECURITY ──
+  { q:"What is the difference between TCP and UDP?", opts:["They are identical","UDP checks data is received; TCP does not","TCP guarantees delivery; UDP is faster but does not guarantee delivery","TCP is for emails; UDP is for web pages"], ans:2, cat:"Networks", exp:"TCP = reliable, checks data arrives. UDP = faster, no guarantees. Video streaming uses UDP." },
+  { q:"What does HTTPS provide that HTTP does not?", opts:["Faster speeds","Larger file support","Encrypted connection protecting data in transit","More bandwidth"], ans:2, cat:"Networks", exp:"HTTPS uses SSL/TLS to encrypt data between client and server — shown by the padlock in browsers." },
+  { q:"What is two-factor authentication?", opts:["Two different passwords","Verifying identity using two separate methods","Two user accounts","Logging in twice"], ans:1, cat:"Security", exp:"2FA requires two forms of verification — e.g. a password plus a code sent to your phone." },
+  { q:"What is a SQL injection attack?", opts:["Flooding a server","Stealing cookies","Inserting malicious SQL code into an input to manipulate a database","Guessing passwords"], ans:2, cat:"Security", exp:"SQL injection inserts SQL commands into form fields to trick a database into revealing or deleting data." },
+  { q:"What is social engineering in cybersecurity?", opts:["Building secure networks","Writing secure code","Manipulating people into revealing confidential information","Encrypting databases"], ans:2, cat:"Security", exp:"Social engineering exploits human psychology rather than technical vulnerabilities to gain access." },
+];
+
+const PYTHON_CHALLENGES = [
+
+  // ── THEORY QUESTIONS ──────────────────────────────────────────────────
+  { topic:"Variables", q:"What is a variable in Python?",
+    opts:["A type of loop","A named container that stores a value","A function","A fixed number that never changes"], ans:1,
+    exp:"A variable is like a labelled box — it stores a value that can change. Example: score = 10" },
+
+  { topic:"Data Types", q:"Which data type would you use to store someone's name?",
+    opts:["Integer (int)","Boolean (bool)","Float","String (str)"], ans:3,
+    exp:"Strings store text. In Python: name = 'Alex'. Always use quotes around string values." },
+
+  { topic:"Data Types", q:"What is the difference between an integer and a float in Python?",
+    opts:["They are the same","Integers are text; floats are numbers","An integer is a whole number; a float has a decimal point","Floats are always bigger"], ans:2,
+    exp:"int stores whole numbers (5, -3, 100). float stores decimals (3.14, 9.5). Example: age = 14 vs price = 2.99" },
+
+  { topic:"Boolean Logic", q:"What values can a Boolean hold?",
+    opts:["Yes or No","1 or 0","Any number","True or False"], ans:3,
+    exp:"Boolean variables can only be True or False. They are used in conditions: is_logged_in = True" },
+
+  { topic:"Print & Input", q:"What does the input() function always return in Python?",
+    opts:["An integer","A float","A string","A boolean"], ans:2,
+    exp:"input() always returns a string — even if the user types a number. Use int() to convert it: age = int(input('Age: '))" },
+
+  { topic:"Selection", q:"Which keyword starts a conditional statement in Python?",
+    opts:["when","check","if","select"], ans:2,
+    exp:"Python uses if, elif and else for selection. Example: if score > 50: print('Pass')" },
+
+  { topic:"Iteration", q:"What is the difference between a for loop and a while loop?",
+    opts:["They are identical","A for loop repeats a fixed number of times; a while loop repeats while a condition is True","While loops are faster","For loops only work with lists"], ans:1,
+    exp:"for loops: for i in range(5) — runs exactly 5 times. while loops: while lives > 0 — runs until the condition is False." },
+
+  { topic:"Functions", q:"What keyword is used to define a function in Python?",
+    opts:["function","define","func","def"], ans:3,
+    exp:"Python uses def. Example: def greet(): — followed by an indented block. Call it with: greet()" },
+
+  { topic:"Functions", q:"What does the return keyword do in a function?",
+    opts:["Prints a value to the screen","Ends the whole program","Sends a value back to where the function was called","Repeats the function"], ans:2,
+    exp:"return exits the function and passes a value back. Example: def double(n): return n * 2 — result = double(5) gives 6." },
+
+  { topic:"Lists", q:"How do you access the first item in a Python list called scores?",
+    opts:["scores[1]","scores(0)","scores[0]","scores.first()"], ans:2,
+    exp:"Python lists are zero-indexed. scores[0] is the first item, scores[1] the second. Example: names = ['Ali','Beth','Carl'] — names[0] = 'Ali'" },
+
+  { topic:"Lists", q:"Which method adds an item to the END of a Python list?",
+    opts:["list.add()","list.insert()","list.push()","list.append()"], ans:3,
+    exp:"append() adds to the end. Example: fruits = ['apple'] then fruits.append('banana') gives ['apple', 'banana']" },
+
+  { topic:"String Methods", q:"What does the .upper() method do to a string?",
+    opts:["Reverses it","Makes it longer","Converts all characters to uppercase","Removes spaces"], ans:2,
+    exp:"'hello'.upper() returns 'HELLO'. Similarly .lower() gives lowercase. Useful for comparing input without case issues." },
+
+  { topic:"Errors", q:"What type of error occurs when Python cannot understand your code's grammar?",
+    opts:["Runtime Error","Logic Error","Syntax Error","Name Error"], ans:2,
+    exp:"Syntax errors break Python's grammar rules — e.g. missing a colon after if x > 5. The program won't run at all." },
+
+  { topic:"Errors", q:"What is a logic error?",
+    opts:["Code that crashes","Code with wrong spelling","Code that runs but gives the wrong answer","Missing brackets"], ans:2,
+    exp:"Logic errors: the code runs without crashing but the output is wrong. Example: writing score + 1 when you meant score * 2." },
+
+  { topic:"Modules", q:"What does import random allow you to do?",
+    opts:["Connect to the internet","Create graphics","Generate random numbers and choices","Sort lists automatically"], ans:2,
+    exp:"import random gives access to functions like random.randint(1,10) which picks a random whole number between 1 and 10." },
+
+  // ── CODE TASKS ────────────────────────────────────────────────────────
+  { topic:"Output Task", q:"What does this code print?",
+    code:"print('Hello')\nprint('World')", 
+    opts:["Hello World","HelloWorld","Hello\nWorld","Hello then World on separate lines"], ans:3,
+    exp:"Each print() outputs on its own line. Output:\nHello\nWorld" },
+
+  { topic:"Variables Task", q:"What is stored in total after this runs?",
+    code:"a = 10\nb = 3\ntotal = a + b\nprint(total)",
+    opts:["103","7","ab","13"], ans:3,
+    exp:"a + b = 10 + 3 = 13. Python adds numbers with +. String concatenation uses + too, but here a and b are integers." },
+
+  { topic:"String Task", q:"What does this print?",
+    code:"name = 'Maya'\nprint('Hello, ' + name + '!')",
+    opts:["Hello, !","Hello, Maya","Hello, Maya!","Hello, name!"], ans:2,
+    exp:"The + operator joins strings. 'Hello, ' + 'Maya' + '!' = 'Hello, Maya!'" },
+
+  { topic:"For Loop Task", q:"How many times does this loop run?",
+    code:"for i in range(1, 6):\n    print(i)",
+    opts:["6 times","4 times","5 times","10 times"], ans:2,
+    exp:"range(1, 6) produces 1, 2, 3, 4, 5 — five values. The end value (6) is NOT included." },
+
+  { topic:"While Loop Task", q:"What is printed when this code runs?",
+    code:"count = 0\nwhile count < 3:\n    count += 1\nprint(count)",
+    opts:["0","2","4","3"], ans:3,
+    exp:"count starts at 0, adds 1 each loop: 0→1→2→3. When count = 3 the condition count < 3 is False, loop stops. Prints 3." },
+
+  { topic:"If/Else Task", q:"What does this print when score = 55?",
+    code:"score = 55\nif score >= 60:\n    print('Pass')\nelif score >= 40:\n    print('Nearly')\nelse:\n    print('Fail')",
+    opts:["Pass","Fail","Nearly","Nothing"], ans:2,
+    exp:"55 is not >= 60 so if is False. 55 IS >= 40 so elif runs. Output: Nearly" },
+
+  { topic:"List Task", q:"What does this print?",
+    code:"scores = [8, 3, 9, 5]\nprint(scores[2])",
+    opts:["3","8","5","9"], ans:3,
+    exp:"Index 0=8, index 1=3, index 2=9, index 3=5. scores[2] = 9" },
+
+  { topic:"Function Task", q:"What does this function return when called as area(4, 5)?",
+    code:"def area(width, height):\n    return width * height\n\nprint(area(4, 5))",
+    opts:["9","45","20","Error"], ans:2,
+    exp:"width=4, height=5. width * height = 4 * 5 = 20. The function returns 20 which is then printed." },
+
+  { topic:"f-string Task", q:"What does this print?",
+    code:"name = 'Sam'\nage = 13\nprint(f'My name is {name} and I am {age}.')",
+    opts:["My name is {name} and I am {age}.","f'My name is Sam...'","My name is Sam and I am 13.","Error"], ans:2,
+    exp:"f-strings (f'...') embed variable values using {}. Output: My name is Sam and I am 13." },
+
+  { topic:"List + Loop Task", q:"What is the value of total at the end?",
+    code:"nums = [2, 4, 6, 8]\ntotal = 0\nfor n in nums:\n    total += n\nprint(total)",
+    opts:["20","2468","0","20"], ans:3,
+    exp:"total = 0+2+4+6+8 = 20. += adds each number to the running total. Output: 20" },
+
+  { topic:"Modulus Task", q:"What does this print?",
+    code:"number = 17\nif number % 2 == 0:\n    print('Even')\nelse:\n    print('Odd')",
+    opts:["Even","0","1","Odd"], ans:3,
+    exp:"% is the modulus (remainder) operator. 17 % 2 = 1 (remainder), not 0. So the else runs and prints Odd." },
+];
+
+// ═══════════════════════════════════════════════════════════════
+// PYTHON CHALLENGES PART B (20 tasks)
+// ═══════════════════════════════════════════════════════════════
+
+const JS_CHALLENGES = [
+
+  // ── MORE PYTHON THEORY ─────────────────────────────────────────────
+  { topic:"Scope", q:"What is the difference between a local and a global variable?",
+    opts:["They are the same","A local variable exists only inside a function; a global variable is accessible everywhere","Global variables are faster","Local variables are always integers"], ans:1,
+    exp:"Variables defined inside a function are local — they disappear when the function ends. Global variables are defined outside functions." },
+
+  { topic:"Dictionaries", q:"What is a Python dictionary?",
+    opts:["A sorted list","A collection of key-value pairs","A type of loop","A function that returns text"], ans:1,
+    exp:"Dictionaries store data as key-value pairs. Example: student = {'name': 'Ali', 'age': 15}. Access with student['name']" },
+
+  { topic:"Dictionaries Task", q:"What does this print?",
+    code:"student = {'name': 'Lexi', 'score': 92}\nprint(student['score'])",
+    opts:["Lexi","student","92","Error"], ans:2,
+    exp:"student['score'] accesses the value stored at the key 'score' which is 92." },
+
+  { topic:"Nested Loops", q:"How many times is 'Hi' printed?",
+    code:"for i in range(3):\n    for j in range(2):\n        print('Hi')",
+    opts:["5","3","2","6"], ans:3,
+    exp:"Outer loop: 3 times. Inner loop: 2 times each. 3 × 2 = 6 total prints of 'Hi'." },
+
+  { topic:"String Slicing", q:"What does this print?",
+    code:"word = 'PYTHON'\nprint(word[0:3])",
+    opts:["PYTH","PYT","YTH","Error"], ans:1,
+    exp:"Slicing [0:3] returns characters at index 0, 1, 2. P=0, Y=1, T=2, H=3. [0:3] = PYT (stop index is excluded)." },
+
+  { topic:"Exception Handling", q:"What is the purpose of try and except in Python?",
+    opts:["To speed up code","To create functions","To catch and handle errors gracefully instead of crashing","To import modules"], ans:2,
+    exp:"try/except prevents crashes. Code in try runs normally; if an error occurs, except handles it. Example: try: x=int(input()) except ValueError: print('Not a number!')" },
+
+  { topic:"Exception Task", q:"What prints when this runs and the user types 'hello'?",
+    code:"try:\n    x = int(input('Enter: '))\n    print(x * 2)\nexcept ValueError:\n    print('Invalid number!')",
+    opts:["hello * 2","0","hellohello","Invalid number!"], ans:3,
+    exp:"int('hello') causes a ValueError since 'hello' cannot be converted to integer. The except block catches it and prints 'Invalid number!'" },
+
+  { topic:"List Comprehension", q:"What does this produce?",
+    code:"squares = [x**2 for x in range(1, 5)]\nprint(squares)",
+    opts:["[1, 2, 3, 4]","[2, 4, 6, 8]","[1, 4, 9, 16, 25]","[1, 4, 9, 16]"], ans:3,
+    exp:"range(1,5) gives 1,2,3,4. Squaring each: 1²=1, 2²=4, 3²=9, 4²=16. Result: [1, 4, 9, 16]" },
+
+  { topic:"Classes", q:"What does __init__ do in a Python class?",
+    code:"class Dog:\n    def __init__(self, name):\n        self.name = name",
+    opts:["Deletes the object","Prints the class name","Initialises a new object — runs automatically when one is created","Returns the dog's name"], ans:2,
+    exp:"__init__ is the constructor. It runs automatically when you do: my_dog = Dog('Rex'). self.name = name stores the name on the object." },
+
+  { topic:"Classes Task", q:"What does this print?",
+    code:"class Cat:\n    def __init__(self, name):\n        self.name = name\n    def speak(self):\n        return self.name + ' says meow!'\n\nc = Cat('Whiskers')\nprint(c.speak())",
+    opts:["Cat says meow!","Whiskers","meow!","Whiskers says meow!"], ans:3,
+    exp:"Cat('Whiskers') creates a Cat with name='Whiskers'. c.speak() returns 'Whiskers' + ' says meow!' = 'Whiskers says meow!'" },
+
+  { topic:"File Handling", q:"What does this code do?",
+    code:"with open('scores.txt', 'w') as f:\n    f.write('Alice: 95')",
+    opts:["Reads from scores.txt","Creates scores.txt and writes 'Alice: 95' into it","Deletes scores.txt","Prints Alice: 95 to screen"], ans:1,
+    exp:"'w' mode opens for writing (creates file if it doesn't exist). f.write() writes the string to the file. 'with' ensures it closes automatically." },
+
+  { topic:"Recursion", q:"What does this return when called as countdown(3)?",
+    code:"def countdown(n):\n    if n == 0:\n        return 'Go!'\n    return str(n) + '... ' + countdown(n-1)",
+    opts:["Go!","3... 2... 1...","3... 2... 1... Go!","Error"], ans:2,
+    exp:"countdown(3) = '3... ' + countdown(2) = '3... 2... ' + countdown(1) = '3... 2... 1... ' + countdown(0) = '3... 2... 1... Go!'" },
+
+  { topic:"Sorting Task", q:"What does this print?",
+    code:"nums = [5, 2, 8, 1, 9]\nnums.sort()\nprint(nums)",
+    opts:["[5, 2, 8, 1, 9]","[9, 8, 5, 2, 1]","[1, 2, 5, 8, 9]","Error"], ans:2,
+    exp:".sort() sorts a list in ascending order (smallest to largest). The original list is modified in place." },
+
+  { topic:"String Methods Task", q:"What does this print?",
+    code:"sentence = 'hello world'\nwords = sentence.split()\nprint(len(words))",
+    opts:["11","1","2","hello"], ans:2,
+    exp:".split() splits a string by spaces into a list: ['hello', 'world']. len() of that list = 2." },
+
+  { topic:"Boolean Task", q:"What does this print?",
+    code:"x = 8\nresult = x > 5 and x < 10\nprint(result)",
+    opts:["8","and","False","True"], ans:3,
+    exp:"x > 5 is True (8 > 5). x < 10 is True (8 < 10). True AND True = True. Python boolean operators: and, or, not." },
+
+  { topic:"Format Task", q:"Which line correctly asks for a number and stores it as an integer?",
+    opts:["age = input('Age: ')","age = int(input('Age: '))","age = integer(input('Age: '))","age = number(input('Age: '))"], ans:1,
+    exp:"input() returns a string. Wrap with int() to convert: age = int(input('Age: ')). This is essential for arithmetic — you can't add strings and numbers." },
+
+  { topic:"Range Task", q:"What does range(0, 10, 2) produce?",
+    opts:["0 1 2 3 4 5 6 7 8 9 10","2 4 6 8 10","0 2 4 6 8","0 2 4 6 8 10"], ans:2,
+    exp:"range(start, stop, step). range(0,10,2) counts from 0 up to (not including) 10 in steps of 2: 0, 2, 4, 6, 8." },
+
+  { topic:"List Methods Task", q:"What does this print?",
+    code:"items = ['pen', 'pencil', 'ruler']\nitems.remove('pencil')\nprint(items)",
+    opts:["['pen', 'pencil', 'ruler']","['pencil']","['pen', 'ruler']","Error"], ans:2,
+    exp:".remove() finds and deletes the first occurrence of that value. Result: ['pen', 'ruler']" },
+
+  { topic:"Enumerate Task", q:"What does enumerate() do in this loop?",
+    code:"fruits = ['apple', 'banana', 'cherry']\nfor i, fruit in enumerate(fruits):\n    print(i, fruit)",
+    opts:["Sorts the list","Provides both the index and the value in each iteration","Counts the total items","Reverses the list"], ans:1,
+    exp:"enumerate() gives you index+value pairs. Output: 0 apple / 1 banana / 2 cherry. Useful when you need both position and value." },
+
+  { topic:"Comprehension Task", q:"What does this list comprehension create?",
+    code:"evens = [x for x in range(10) if x % 2 == 0]\nprint(evens)",
+    opts:["[1,3,5,7,9]","[0,2,4,6,8,10]","[0,2,4,6,8]","[2,4,6,8]"], ans:2,
+    exp:"range(10) = 0-9. The if x % 2 == 0 filter keeps only even numbers: 0,2,4,6,8." },
+];
+
+function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+// ─── WORDLE ─────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════
+// WORDLE
+// ═══════════════════════════════════════════════════════════════
+let wState={};
+function initWordle(){
+  if(!checkName())return;
+  const kw=shuffle(KEYWORDS)[0];
+  wState={word:kw.word.toUpperCase(),hint:kw.hint,category:kw.category,maxRows:6,curRow:0,done:false};
+  document.getElementById('wordle-category').textContent='[ '+kw.category+' ]';
+  document.getElementById('wordle-hint').textContent='💡 '+kw.hint;
+  document.getElementById('wordle-input').value='';
+  document.getElementById('wordle-msg').textContent='';
+  document.getElementById('wordle-msg').className='msg';
+  buildWordleGrid();buildWordleKeyboard();
+  document.getElementById('wordle-input').focus();
+}
+function buildWordleGrid(){
+  const len=wState.word.length,grid=document.getElementById('wordle-grid');grid.innerHTML='';
+  for(let r=0;r<wState.maxRows;r++){const row=document.createElement('div');row.className='wordle-row';row.id='wr-'+r;for(let c=0;c<len;c++){const cell=document.createElement('div');cell.className='wordle-cell';cell.id=`wc-${r}-${c}`;row.appendChild(cell);}grid.appendChild(row);}
+}
+function buildWordleKeyboard(){
+  const kb=document.getElementById('wordle-keyboard');kb.innerHTML='';
+  [['Q','W','E','R','T','Y','U','I','O','P'],['A','S','D','F','G','H','J','K','L'],['ENTER','Z','X','C','V','B','N','M','⌫']].forEach(r=>{
+    const row=document.createElement('div');row.className='kb-row';
+    r.forEach(k=>{const btn=document.createElement('button');btn.className='kb-key'+(k.length>1?' wide':'');btn.textContent=k;btn.dataset.key=k;btn.onclick=()=>{if(k==='ENTER')wordleSubmit();else if(k==='⌫')wordleBackspace();else wordleType(k);};row.appendChild(btn);});
+    kb.appendChild(row);
+  });
+}
+function wordleType(k){if(wState.done)return;const inp=document.getElementById('wordle-input');if(inp.value.length<wState.word.length)inp.value+=k;}
+function wordleBackspace(){const inp=document.getElementById('wordle-input');inp.value=inp.value.slice(0,-1);}
+document.addEventListener('keydown',e=>{
+  if(!document.getElementById('wordle').classList.contains('active'))return;
+  const inp=document.getElementById('wordle-input');
+  if(document.activeElement!==inp){if(e.key==='Enter')wordleSubmit();else if(e.key==='Backspace')wordleBackspace();else if(/^[a-zA-Z]$/.test(e.key))wordleType(e.key.toUpperCase());}
+});
+function wordleSubmit(){
+  if(wState.done)return;
+  const inp=document.getElementById('wordle-input');
+  const guess=inp.value.toUpperCase().trim();
+  if(guess.length!==wState.word.length){setMsg('wordle-msg',`Need ${wState.word.length} letters!`,'wrong');const row=document.getElementById('wr-'+wState.curRow);row.classList.add('shake');setTimeout(()=>row.classList.remove('shake'),400);return;}
+  const result=scoreGuess(guess,wState.word);
+  revealRow(wState.curRow,guess,result);updateWordleKeys(guess,result);inp.value='';
+  if(guess===wState.word){wState.done=true;saveScore({name:playerName||'Player',game:'Wordle',score:100*(wState.maxRows-wState.curRow),detail:`Word: ${wState.word} in ${wState.curRow+1} guess${wState.curRow?'es':''}`});setTimeout(()=>setMsg('wordle-msg','✅ Correct! The word was '+wState.word,'correct'),700);}
+  else{wState.curRow++;if(wState.curRow>=wState.maxRows){wState.done=true;setTimeout(()=>setMsg('wordle-msg','❌ Out of guesses! Word was: '+wState.word,'wrong'),700);}}
+}
+function scoreGuess(guess,word){
+  const res=Array(word.length).fill('absent'),wArr=word.split(''),gArr=guess.split(''),usedW=Array(word.length).fill(false),usedG=Array(guess.length).fill(false);
+  gArr.forEach((c,i)=>{if(c===wArr[i]){res[i]='correct';usedW[i]=usedG[i]=true;}});
+  gArr.forEach((c,i)=>{if(usedG[i])return;for(let j=0;j<wArr.length;j++){if(!usedW[j]&&wArr[j]===c){res[i]='present';usedW[j]=usedG[i]=true;break;}}});
+  return res;
+}
+function revealRow(rowIdx,guess,result){
+  result.forEach((r,i)=>{setTimeout(()=>{const cell=document.getElementById(`wc-${rowIdx}-${i}`);cell.textContent=guess[i];cell.classList.add('flip');setTimeout(()=>{cell.classList.remove('flip','filled');cell.classList.add(r);},200);},i*100);});
+}
+function updateWordleKeys(guess,result){
+  const p={correct:3,present:2,absent:1};
+  guess.split('').forEach((c,i)=>{const btn=document.querySelector(`[data-key="${c}"]`);if(!btn)return;const cur=p[btn.className.split(' ').find(x=>['correct','present','absent'].includes(x))]||0;if((p[result[i]]||0)>cur){btn.classList.remove('correct','present','absent');btn.classList.add(result[i]);}});
+}
+
+// ─── QUIZ ───────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════
+// QUIZ
+// ═══════════════════════════════════════════════════════════════
+let qState={};
+function initQuiz(){
+  if(!checkName())return;
+  qState={questions:shuffle(QUIZ_QUESTIONS).slice(0,10),cur:0,score:0,streak:0,answered:false};
+  document.getElementById('quiz-game').style.display='block';
+  document.getElementById('quiz-end').style.display='none';
+  renderQuestion();
+}
+function renderQuestion(){
+  const q=qState.questions[qState.cur];
+  document.getElementById('q-num').textContent=qState.cur+1;
+  document.getElementById('q-score').textContent=qState.score;
+  document.getElementById('q-streak').textContent=qState.streak;
+  document.getElementById('q-bar').style.width=((qState.cur/10)*100)+'%';
+  document.getElementById('quiz-category-tag').textContent='[ '+q.cat+' ]';
+  document.getElementById('quiz-question').textContent=q.q;
+  const opts=document.getElementById('quiz-options');opts.innerHTML='';
+  q.opts.forEach((o,i)=>{const btn=document.createElement('button');btn.className='quiz-opt';btn.textContent=String.fromCharCode(65+i)+'. '+o;btn.onclick=()=>quizAnswer(i,q.ans,q);opts.appendChild(btn);});
+  document.getElementById('quiz-explanation').style.display='none';
+  document.getElementById('quiz-next-btn').style.display='none';
+  qState.answered=false;
+}
+function quizAnswer(idx,ans,q){
+  if(qState.answered)return;qState.answered=true;
+  const btns=document.querySelectorAll('.quiz-opt');btns.forEach(b=>b.disabled=true);
+  btns[ans].classList.add('correct-ans');
+  if(idx===ans){qState.score++;qState.streak++;}else{btns[idx].classList.add('wrong-ans');qState.streak=0;}
+  document.getElementById('q-score').textContent=qState.score;
+  document.getElementById('q-streak').textContent=qState.streak;
+  const exp=document.getElementById('quiz-explanation');exp.textContent='💡 '+q.exp;exp.style.display='block';
+  document.getElementById('quiz-next-btn').style.display='block';
+}
+function quizNext(){qState.cur++;if(qState.cur>=qState.questions.length)showQuizEnd();else renderQuestion();}
+function showQuizEnd(){
+  document.getElementById('quiz-game').style.display='none';
+  document.getElementById('quiz-end').style.display='block';
+  const pct=(qState.score/10)*100;
+  document.getElementById('final-score').textContent=qState.score+'/10';
+  document.getElementById('final-msg').textContent=pct===100?'🏆 PERFECT!':pct>=80?'🌟 Excellent!':pct>=60?'✅ Good effort!':pct>=40?'📚 Keep revising!':'💪 Keep practising!';
+  saveScore({name:playerName||'Player',game:'Quiz',score:qState.score*10,detail:`${qState.score}/10 correct`});
+}
+
+// ─── CONNECT 4 ──────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════
+// CONNECT 4
+// ═══════════════════════════════════════════════════════════════
+let c4State={};
+function initConnect4(){
+  if(!checkName())return;
+  c4State={board:Array(6).fill(null).map(()=>Array(7).fill(0)),turn:1,scores:[0,0,0],done:false,pendingCol:-1,shuffledQ:shuffle(QUIZ_QUESTIONS),qIdx:0};
+  document.getElementById('c4-question-panel').style.display='none';
+  document.getElementById('c4-msg').style.display='none';
+  renderC4Board();updateC4UI();
+}
+function renderC4Board(){
+  const board=document.getElementById('c4-board'),colBtns=document.getElementById('c4-col-btns');
+  board.innerHTML='';colBtns.innerHTML='';
+  for(let c=0;c<7;c++){const btn=document.createElement('button');btn.className='c4-col-btn';btn.textContent='▼';btn.dataset.col=c;btn.onclick=()=>c4ColumnClick(c);colBtns.appendChild(btn);}
+  for(let r=0;r<6;r++)for(let c=0;c<7;c++){const cell=document.createElement('div');cell.className='c4-cell';cell.id=`c4-${r}-${c}`;const v=c4State.board[r][c];if(v===1)cell.classList.add('p1');if(v===2)cell.classList.add('p2');board.appendChild(cell);}
+}
+function updateC4UI(){
+  const p1=document.getElementById('c4-p1-label'),p2=document.getElementById('c4-p2-label');
+  p1.className='c4-player p1'+(c4State.turn===1?' active-player':'');
+  p2.className='c4-player p2'+(c4State.turn===2?' active-player':'');
+  p1.innerHTML=`🔵 PLAYER 1 <span>${c4State.scores[1]}</span>`;
+  p2.innerHTML=`PLAYER 2 <span>${c4State.scores[2]}</span> 🟠`;
+  document.getElementById('c4-turn-msg').textContent=c4State.done?'':`${c4State.turn===1?'🔵 PLAYER 1':'🟠 PLAYER 2'}'s turn — click a column!`;
+}
+function c4ColumnClick(col){
+  if(c4State.done||c4State.pendingCol>=0)return;
+  if(c4State.board[0][col]!==0){const m=document.getElementById('c4-msg');m.style.display='block';m.className='msg wrong';m.textContent='⚠ That column is full!';setTimeout(()=>m.style.display='none',1800);return;}
+  c4State.pendingCol=col;showC4Question(col);
+}
+function showC4Question(col){
+  const q=c4State.shuffledQ[c4State.qIdx%c4State.shuffledQ.length];c4State.qIdx++;
+  document.getElementById('c4-col-num').textContent=col+1;
+  document.getElementById('c4-q-text').textContent=q.q;
+  const opts=document.getElementById('c4-options');opts.innerHTML='';
+  q.opts.forEach((o,i)=>{const btn=document.createElement('button');btn.className='c4-opt';btn.textContent=String.fromCharCode(65+i)+'. '+o;btn.onclick=()=>c4Answer(i,q.ans,q);opts.appendChild(btn);});
+  document.getElementById('c4-q-msg').style.display='none';
+  document.getElementById('c4-question-panel').style.display='block';
+}
+function c4Answer(idx,ans,q){
+  document.querySelectorAll('.c4-opt').forEach(b=>b.disabled=true);
+  const msg=document.getElementById('c4-q-msg');msg.style.display='block';
+  if(idx===ans){
+    document.querySelectorAll('.c4-opt')[ans].classList.add('correct-ans');
+    msg.className='msg correct';msg.textContent='✅ Correct! Placing piece…';
+    setTimeout(()=>{placeC4Piece();document.getElementById('c4-question-panel').style.display='none';c4State.pendingCol=-1;},900);
+  }else{
+    document.querySelectorAll('.c4-opt')[ans].classList.add('correct-ans');
+    document.querySelectorAll('.c4-opt')[idx].classList.add('wrong-ans');
+    msg.className='msg wrong';msg.textContent=`❌ Wrong! Answer: ${q.opts[q.ans]}. Turn lost.`;
+    setTimeout(()=>{document.getElementById('c4-question-panel').style.display='none';c4State.pendingCol=-1;c4State.turn=c4State.turn===1?2:1;updateC4UI();},1800);
+  }
+}
+function placeC4Piece(){
+  const col=c4State.pendingCol;let row=-1;
+  for(let r=5;r>=0;r--){if(c4State.board[r][col]===0){row=r;break;}}
+  if(row===-1)return;
+  c4State.board[row][col]=c4State.turn;
+  document.getElementById(`c4-${row}-${col}`).classList.add(c4State.turn===1?'p1':'p2');
+  const winner=checkC4Win();
+  if(winner){c4State.done=true;c4State.scores[winner]++;updateC4UI();const m=document.getElementById('c4-msg');m.style.display='block';m.className='msg correct';m.textContent=`🏆 PLAYER ${winner} WINS! (P1:${c4State.scores[1]} P2:${c4State.scores[2]})`;document.querySelectorAll('.c4-col-btn').forEach(b=>b.disabled=true);return;}
+  if(c4State.board[0].every(v=>v!==0)){c4State.done=true;const m=document.getElementById('c4-msg');m.style.display='block';m.className='msg info';m.textContent="🤝 It's a draw!";return;}
+  c4State.turn=c4State.turn===1?2:1;updateC4UI();
+}
+function checkC4Win(){
+  const b=c4State.board;
+  for(let r=0;r<6;r++)for(let c=0;c<7;c++){
+    if(!b[r][c])continue;const p=b[r][c];
+    for(const[dr,dc] of [[0,1],[1,0],[1,1],[1,-1]]){
+      let cells=[[r,c]],nr=r+dr,nc=c+dc;
+      while(nr>=0&&nr<6&&nc>=0&&nc<7&&b[nr][nc]===p){cells.push([nr,nc]);nr+=dr;nc+=dc;}
+      if(cells.length>=4){cells.forEach(([rr,cc])=>document.getElementById(`c4-${rr}-${cc}`).classList.add('win'));return p;}
+    }
+  }
+  return null;
+}
+
+// ─── HANGMAN ────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════
+// HANGMAN
+// ═══════════════════════════════════════════════════════════════
+const HM_PARTS=['hm-head','hm-body','hm-larm','hm-rarm','hm-lleg','hm-rleg'];
+let hmState={};
+function initHangman(){
+  if(!checkName())return;
+  const kw=shuffle(KEYWORDS.filter(k=>k.word.length>=4))[0];
+  hmState={word:kw.word.toUpperCase(),hint:kw.hint,category:kw.category,lives:6,guessed:new Set(),done:false};
+  HM_PARTS.forEach(id=>document.getElementById(id).classList.remove('show'));
+  document.getElementById('hm-category').textContent='[ '+kw.category+' ]';
+  document.getElementById('hm-hint').textContent='💡 '+kw.hint;
+  document.getElementById('hm-msg').style.display='none';
+  renderHMWord();renderHMLives();renderHMGuessed();buildHMKeyboard();
+}
+function renderHMWord(){
+  const disp=document.getElementById('hm-word-display');disp.innerHTML='';
+  hmState.word.split('').forEach(c=>{const el=document.createElement('div');if(c===' '){el.className='hm-letter space';}else{el.className='hm-letter';el.textContent=hmState.guessed.has(c)?c:'';}disp.appendChild(el);});
+}
+function renderHMLives(){document.getElementById('hm-lives').innerHTML=`LIVES: <span>${'❤️'.repeat(hmState.lives)}${'🖤'.repeat(6-hmState.lives)}</span>`;}
+function renderHMGuessed(){const wrong=[...hmState.guessed].filter(c=>!hmState.word.includes(c));document.getElementById('hm-guessed').textContent=wrong.length?'Wrong: '+wrong.join(' '):'';}
+function buildHMKeyboard(){
+  const kb=document.getElementById('hm-keyboard');kb.innerHTML='';
+  'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').forEach(c=>{const btn=document.createElement('button');btn.className='hm-key';btn.textContent=c;btn.id='hmk-'+c;btn.onclick=()=>hmGuess(c);kb.appendChild(btn);});
+}
+function hmGuess(c){
+  if(hmState.done||hmState.guessed.has(c))return;
+  hmState.guessed.add(c);
+  const btn=document.getElementById('hmk-'+c);
+  if(hmState.word.includes(c)){btn.classList.add('hit');}
+  else{btn.classList.add('miss');btn.disabled=true;hmState.lives--;document.getElementById(HM_PARTS[6-hmState.lives-1]).classList.add('show');}
+  renderHMWord();renderHMLives();renderHMGuessed();
+  const won=hmState.word.split('').every(ch=>ch===' '||hmState.guessed.has(ch));
+  if(won){hmState.done=true;saveScore({name:playerName||'Player',game:'Hangman',score:hmState.lives*20+20,detail:`Word: ${hmState.word}, ${6-hmState.lives} wrong`});const m=document.getElementById('hm-msg');m.style.display='block';m.className='msg correct';m.textContent=`✅ You got it! "${hmState.word}" 🎉`;document.querySelectorAll('.hm-key').forEach(b=>b.disabled=true);return;}
+  if(hmState.lives<=0){hmState.done=true;hmState.word.split('').forEach(c=>{if(c!==' ')hmState.guessed.add(c);});renderHMWord();const m=document.getElementById('hm-msg');m.style.display='block';m.className='msg wrong';m.textContent=`❌ Out of lives! The word was "${hmState.word}".`;document.querySelectorAll('.hm-key').forEach(b=>b.disabled=true);}
+}
+
+// ═══════════════════════════════════════════════════════════════
+
+// ─── PYTHON CHALLENGES ──────────────────────────────────────
+// CODE CHALLENGES (shared engine for Python & JS)
+// ═══════════════════════════════════════════════════════════════
+let chState={};
+
+function initChallenge(lang){
+  if(!checkName())return;
+  const bank = lang==='python' ? PYTHON_CHALLENGES : JS_CHALLENGES;
+  const prefix = lang==='python' ? 'py' : 'js';
+  chState[lang]={
+    questions: shuffle(bank).slice(0,10),
+    cur:0, score:0, streak:0, answered:false, prefix, lang
+  };
+  document.getElementById(prefix+'-game').style.display='block';
+  document.getElementById(prefix+'-end').style.display='none';
+  renderChallenge(lang);
+}
+
+function renderChallenge(lang){
+  const st=chState[lang];
+  const q=st.questions[st.cur];
+  const p=st.prefix;
+  document.getElementById(p+'-num').textContent=st.cur+1;
+  document.getElementById(p+'-score').textContent=st.score;
+  document.getElementById(p+'-streak').textContent=st.streak;
+  document.getElementById(p+'-bar').style.width=((st.cur/10)*100)+'%';
+
+  // Topic badge
+  const badge='<span class="lang-badge py">PYTHON</span>';
+  document.getElementById(p+'-topic').innerHTML=badge+q.topic;
+
+  document.getElementById(p+'-question').textContent=q.q;
+
+  // Code block
+  const codeEl=document.getElementById(p+'-code');
+  if(q.code){
+    codeEl.style.display='block';
+    // Syntax highlight — safe tokeniser using unicode private-use placeholders
+    const _KW = /\b(def|return|for|while|if|elif|else|in|not|and|or|import|from|class|try|except|with|as|pass|break|continue|True|False|None)\b/g;
+    const _FN = /\b(print|input|range|len|int|str|float|list|dict|append|remove|sort|split|join|type|enumerate|zip|map|filter|open|super|self)\b/g;
+    const _NM = /(?<![\w])(\d+(?:\.\d+)?)(?![\w])/g;
+    const _PH = '\uE010\uE011\uE012\uE013\uE014\uE015\uE016\uE017\uE018\uE019\uE01A\uE01B\uE01C\uE01D\uE01E\uE01F';
+
+    function hlLine(raw) {
+      let line = raw.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      const saved = []; // [placeholder_char, html_string, ...]
+      let out = '', i = 0;
+      while (i < line.length) {
+        // Comment
+        if (line[i]==='#') {
+          const ph = _PH[saved.length/2 % _PH.length];
+          saved.push(ph, '<span class="cm">'+line.slice(i)+'</span>');
+          out += ph; break;
+        }
+        // f-string  f'...'
+        if (line[i]==='f' && line[i+1]==="'") {
+          let end = line.indexOf("'", i+2);
+          if (end===-1) end = line.length-1;
+          const ph = _PH[saved.length/2 % _PH.length];
+          saved.push(ph, '<span class="st">f'+line.slice(i+1,end+1)+'</span>');
+          out += ph; i = end+1; continue;
+        }
+        // Single-quoted string
+        if (line[i]==="'") {
+          let end = line.indexOf("'", i+1);
+          if (end===-1) end = line.length-1;
+          const ph = _PH[saved.length/2 % _PH.length];
+          saved.push(ph, '<span class="st">'+line.slice(i,end+1)+'</span>');
+          out += ph; i = end+1; continue;
+        }
+        // Double-quoted string
+        if (line[i]==='"') {
+          let end = line.indexOf('"', i+1);
+          if (end===-1) end = line.length-1;
+          const ph = _PH[saved.length/2 % _PH.length];
+          saved.push(ph, '<span class="st">'+line.slice(i,end+1)+'</span>');
+          out += ph; i = end+1; continue;
+        }
+        out += line[i]; i++;
+      }
+      // Apply keyword/function/number highlighting to non-string code
+      out = out.replace(_KW,'<span class="kw">$1</span>')
+               .replace(_FN,'<span class="fn">$1</span>')
+               .replace(_NM,'<span class="nm">$1</span>');
+      // Restore saved strings and comments
+      for (let n=0; n<saved.length; n+=2) out = out.split(saved[n]).join(saved[n+1]);
+      // Safety: remove any leftover placeholder chars
+      out = out.replace(/[\uE010-\uE01F]/g, '');
+      return out;
+    }
+
+    const highlighted = q.code.split('\n').map(hlLine).join('\n');
+    codeEl.innerHTML = highlighted;
+  }else{
+    codeEl.style.display='none';
+  }
+
+  // Options
+  const optsEl=document.getElementById(p+'-options');optsEl.innerHTML='';
+  q.opts.forEach((o,i)=>{
+    const btn=document.createElement('button');btn.className='ch-opt';
+    btn.textContent=String.fromCharCode(65+i)+'. '+o;
+    btn.onclick=()=>chAnswer(lang,i,q.ans,q);
+    optsEl.appendChild(btn);
+  });
+
+  document.getElementById(p+'-explanation').style.display='none';
+  if(document.getElementById(p+'-next-btn')) document.getElementById(p+'-next-btn').style.display='none';
+  st.answered=false;
+}
+
+function chAnswer(lang,idx,ans,q){
+  const st=chState[lang];
+  if(st.answered)return;st.answered=true;
+  const p=st.prefix;
+  const btns=document.querySelectorAll('#'+p+'-options .ch-opt');
+  btns.forEach(b=>b.disabled=true);
+  btns[ans].classList.add('correct-ans');
+  if(idx===ans){st.score++;st.streak++;}else{btns[idx].classList.add('wrong-ans');st.streak=0;}
+  document.getElementById(p+'-score').textContent=st.score;
+  document.getElementById(p+'-streak').textContent=st.streak;
+  const exp=document.getElementById(p+'-explanation');
+  exp.innerHTML='💡 '+q.exp.replace(/\n/g,'<br>');exp.style.display='block';
+  document.getElementById(p+'-next-btn').style.display='block';
+}
+
+function chNext(lang){
+  const st=chState[lang];
+  st.cur++;
+  if(st.cur>=st.questions.length) showChEnd(lang); else renderChallenge(lang);
+}
+
+function showChEnd(lang){
+  const st=chState[lang];const p=st.prefix;
+  document.getElementById(p+'-game').style.display='none';
+  document.getElementById(p+'-end').style.display='block';
+  const pct=(st.score/10)*100;
+  document.getElementById(p+'-final-score').textContent=st.score+'/10';
+  document.getElementById(p+'-final-msg').textContent=
+    pct===100?'🏆 PERFECT! Outstanding!':pct>=80?'🌟 Excellent work!':pct>=60?'✅ Good effort!':pct>=40?'📚 Keep going!':'💪 Keep practising!';
+  const gameName=lang==='python'?'Python Part A':'Python Part B';
+  saveScore({name:playerName||'Player',game:gameName,score:st.score*10,detail:`${st.score}/10 correct`});
+}
+
+// ═══════════════════════════════════════════════════════════════
+
+// ─── WORD SEARCH LEADERBOARD ────────────────────────────────
+// LEADERBOARD
+// ═══════════════════════════════════════════════════════════
+function wsGetLB() { return JSON.parse(store.get('ws_leaderboard') || '[]'); }
+function wsSaveLB(lb) { store.set('ws_leaderboard', JSON.stringify(lb)); }
+
+function wsAddToLB(name, secs, diff) {
+  const lb = wsGetLB();
+  lb.push({ name:name.trim()||'Anonymous', secs, diff, date:new Date().toLocaleDateString('en-GB') });
+  // Sort by fastest time, then by difficulty weight
+  const dw = {easy:1, medium:2, hard:3};
+  lb.sort((a,b) => (dw[b.diff]||1)*10000/b.secs - (dw[a.diff]||1)*10000/a.secs);
+  wsSaveLB(lb.slice(0,20)); // keep top 20
+  wsRenderLB();
+}
+
+function wsRenderLB() {
+  const el = document.getElementById('lb-entries');
+  if (!el) return;
+  const lb = wsGetLB();
+  if (!lb.length) {
+    el.innerHTML = '<div class="lb-empty">Complete a puzzle to appear here!</div>';
+    return;
+  }
+  const medals = ['🥇','🥈','🥉'];
+  el.innerHTML = lb.slice(0,10).map((e,i) => {
+    const m = String(Math.floor(e.secs/60)).padStart(2,'0');
+    const s = String(e.secs%60).padStart(2,'0');
+    return `<div class="lb-entry">
+      <div class="lb-rank">${medals[i]||'#'+(i+1)}</div>
+      <div class="lb-name">${e.name}</div>
+      <div class="lb-diff">${e.diff.toUpperCase()}</div>
+      <div class="lb-time">${m}:${s}</div>
+    </div>`;
+  }).join('');
+}
+
+function wsClearLB() {
+  if (confirm('Clear the leaderboard?')) { store.del('ws_leaderboard'); wsRenderLB(); }
+}
+
+function wsSubmitScore() {
+  const name = document.getElementById('winner-name').value.trim() || 'Anonymous';
+  wsAddToLB(name, seconds, difficulty);
+  wsRenderLB();
+newGame();
+}
+
+
+
+// ─── WORD SEARCH GAME ───────────────────────────────────────
+const ALL_WORDS = [
+  // Programming
+  { word:"ALGORITHM",  hint:"A step-by-step set of instructions to solve a problem" },
+  { word:"VARIABLE",   hint:"A named container that stores a value in a program" },
+  { word:"FUNCTION",   hint:"A reusable named block of code that performs a task" },
+  { word:"LOOP",       hint:"A block of code that repeats — for or while" },
+  { word:"BOOLEAN",    hint:"A True or False value used in conditions" },
+  { word:"STRING",     hint:"A sequence of characters — text data in programming" },
+  { word:"INTEGER",    hint:"A whole number with no decimal point" },
+  { word:"ARRAY",      hint:"An ordered collection of items stored under one name" },
+  { word:"CLASS",      hint:"A blueprint for creating objects in OOP" },
+  { word:"METHOD",     hint:"A function that belongs to an object or class" },
+  { word:"OBJECT",     hint:"An instance of a class in object-oriented programming" },
+  { word:"SYNTAX",     hint:"The rules that define the structure of a programming language" },
+  { word:"DEBUG",      hint:"The process of finding and fixing errors in code" },
+  { word:"COMMENT",    hint:"A note in code that the computer ignores" },
+  { word:"RETURN",     hint:"The keyword that sends a value back from a function" },
+  { word:"PARAMETER",  hint:"A variable passed into a function when it is called" },
+  { word:"RECURSION",  hint:"When a function calls itself to solve a smaller problem" },
+  { word:"ITERATION",  hint:"Repeating a block of code — looping" },
+  { word:"SELECTION",  hint:"Choosing a path in code using IF statements" },
+  { word:"SEQUENCE",   hint:"Instructions carried out one after another in order" },
+  // Networks & Web
+  { word:"NETWORK",    hint:"Two or more computers connected to share data" },
+  { word:"INTERNET",   hint:"A worldwide network connecting millions of computers" },
+  { word:"PROTOCOL",   hint:"A set of rules computers follow to communicate" },
+  { word:"ROUTER",     hint:"A device that directs data packets between networks" },
+  { word:"PACKET",     hint:"A small chunk of data sent across a network" },
+  { word:"SERVER",     hint:"A computer that stores and shares files or websites" },
+  { word:"CLIENT",     hint:"A device that requests services from a server" },
+  { word:"HTTP",       hint:"The protocol used to transfer web pages" },
+  { word:"BANDWIDTH",  hint:"The maximum rate of data transfer across a network" },
+  { word:"FIREWALL",   hint:"A system that monitors and filters network traffic" },
+  { word:"HTML",       hint:"The language used to structure web pages" },
+  { word:"CSS",        hint:"The language that controls how web pages look" },
+  // Data & Binary
+  { word:"BINARY",     hint:"A number system using only 0s and 1s — base 2" },
+  { word:"BIT",        hint:"The smallest unit of data — a 0 or a 1" },
+  { word:"BYTE",       hint:"A group of 8 bits" },
+  { word:"ASCII",      hint:"A code that maps characters to binary numbers" },
+  { word:"DATABASE",   hint:"An organised collection of structured data" },
+  { word:"QUERY",      hint:"A request made to a database to retrieve data" },
+  { word:"ENCRYPTION", hint:"Scrambling data so only authorised people can read it" },
+  { word:"COMPRESSION",hint:"Reducing the size of a file without losing data" },
+  // Security
+  { word:"PHISHING",   hint:"A trick to steal personal information via fake emails" },
+  { word:"MALWARE",    hint:"Software designed to damage or gain unauthorised access" },
+  { word:"VIRUS",      hint:"Malicious code that replicates and spreads between programs" },
+  { word:"HACKER",     hint:"Someone who gains unauthorised access to systems" },
+  { word:"PASSWORD",   hint:"A secret string of characters used to verify identity" },
+  { word:"BACKUP",     hint:"A copy of data kept safe in case the original is lost" },
+  // Hardware
+  { word:"CPU",        hint:"The central processing unit — the brain of a computer" },
+  { word:"RAM",        hint:"Fast temporary memory used while the computer runs" },
+  { word:"HARDWARE",   hint:"The physical parts of a computer you can touch" },
+  { word:"SOFTWARE",   hint:"Programs and apps that run on a computer" },
+  { word:"INPUT",      hint:"Data or signals going INTO a computer" },
+  { word:"OUTPUT",     hint:"Data or signals coming OUT of a computer" },
+  { word:"STORAGE",    hint:"Where data is saved permanently, e.g. hard drive" },
+  // Algorithms
+  { word:"SORT",       hint:"Arranging data into order" },
+  { word:"SEARCH",     hint:"Looking through data to find a specific item" },
+  { word:"TRACE",      hint:"Manually following an algorithm step by step" },
+  { word:"PSEUDOCODE", hint:"Writing an algorithm in plain English-like text" },
+];
+
+// ═══════════════════════════════════════════════════════════
+// GAME STATE
+// ═══════════════════════════════════════════════════════════
+const DIFFICULTY = {
+  easy:   { grid:12, words:8,  dirs:[[0,1],[1,0],[1,1]] },
+  medium: { grid:15, words:12, dirs:[[0,1],[1,0],[1,1],[1,-1],[0,-1],[-1,0]] },
+  hard:   { grid:18, words:15, dirs:[[0,1],[1,0],[1,1],[1,-1],[0,-1],[-1,0],[-1,-1],[-1,1]] },
+};
+
+let difficulty   = 'easy';
+let gridSize     = 12;
+let grid         = [];
+let placedWords  = [];
+let foundWords   = new Set();
+let colorIdx     = 0;
+let selecting    = false;
+let selectStart  = null;
+let selectCells  = [];
+let timerInterval= null;
+let seconds      = 0;
+let gameOver     = false;
+
+// ═══════════════════════════════════════════════════════════
+// GAME INIT
+// ═══════════════════════════════════════════════════════════
+function setDifficulty(d) {
+  difficulty = d;
+  document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector(`[onclick="setDifficulty('${d}')"]`).classList.add('active');
+  wsRenderLB();
+newGame();
+}
+
+function newGame() {
+  stopTimer();
+  seconds   = 0;
+  gameOver  = false;
+  foundWords= new Set();
+  colorIdx  = 0;
+  updateTimer();
+  document.getElementById('ws-win-overlay').classList.remove('show');
+
+  const cfg     = DIFFICULTY[difficulty];
+  gridSize      = cfg.grid;
+  const wordCount = cfg.words;
+  const dirs    = cfg.dirs;
+
+  // Pick random words that fit in the grid
+  const eligible = ALL_WORDS.filter(w => w.word.length <= gridSize - 2);
+  const shuffled = [...eligible].sort(() => Math.random() - .5);
+  const chosen   = shuffled.slice(0, wordCount);
+
+  // Build empty grid
+  grid = Array.from({length:gridSize}, () => Array(gridSize).fill(''));
+  placedWords = [];
+
+  // Place each word
+  chosen.forEach(w => placeWord(w, dirs));
+
+  // Fill remaining cells with random letters
+  const alpha = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  for (let r=0; r<gridSize; r++)
+    for (let c=0; c<gridSize; c++)
+      if (!grid[r][c]) grid[r][c] = alpha[Math.floor(Math.random()*26)];
+
+  renderGrid();
+  renderWordList();
+  updateStats();
+  startTimer();
+}
+
+function placeWord(wordObj, dirs) {
+  const word = wordObj.word;
+  const maxAttempts = 200;
+  for (let attempt=0; attempt<maxAttempts; attempt++) {
+    const dir = dirs[Math.floor(Math.random()*dirs.length)];
+    const [dr, dc] = dir;
+    // Random start position
+    const rMax = dr >= 0 ? gridSize - dr*(word.length-1) : gridSize;
+    const cMax = dc >= 0 ? gridSize - dc*(word.length-1) : gridSize;
+    const rMin = dr < 0  ? -dr*(word.length-1) : 0;
+    const cMin = dc < 0  ? -dc*(word.length-1) : 0;
+    const r = Math.floor(Math.random()*(rMax-rMin)) + rMin;
+    const c = Math.floor(Math.random()*(cMax-cMin)) + cMin;
+
+    // Check if it fits
+    let fits = true;
+    const cells = [];
+    for (let i=0; i<word.length; i++) {
+      const nr = r + dr*i, nc = c + dc*i;
+      if (nr<0||nr>=gridSize||nc<0||nc>=gridSize) { fits=false; break; }
+      if (grid[nr][nc] && grid[nr][nc] !== word[i]) { fits=false; break; }
+      cells.push([nr, nc]);
+    }
+    if (fits) {
+      cells.forEach(([nr,nc],i) => grid[nr][nc] = word[i]);
+      placedWords.push({ word:word.toUpperCase(), hint:wordObj.hint, cells, found:false });
+      return true;
+    }
+  }
+  return false;
+}
+
+// ═══════════════════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════════════════
+function renderGrid() {
+  const el = document.getElementById('ws-grid');
+  el.style.gridTemplateColumns = `repeat(${gridSize}, 32px)`;
+  el.innerHTML = '';
+  for (let r=0; r<gridSize; r++) {
+    for (let c=0; c<gridSize; c++) {
+      const cell = document.createElement('div');
+      cell.className = 'ws-cell';
+      cell.textContent = grid[r][c];
+      cell.dataset.r = r; cell.dataset.c = c;
+
+      // Mouse events
+      cell.addEventListener('mousedown',  e => startSelect(r,c,e));
+      cell.addEventListener('mouseover',  e => moveSelect(r,c,e));
+      cell.addEventListener('mouseup',    e => endSelect(e));
+      // Touch events
+      cell.addEventListener('touchstart', e => { e.preventDefault(); startSelect(r,c,e); }, {passive:false});
+      cell.addEventListener('touchmove',  e => { e.preventDefault(); handleTouchMove(e); }, {passive:false});
+      cell.addEventListener('touchend',   e => { e.preventDefault(); endSelect(e); }, {passive:false});
+
+      el.appendChild(cell);
+    }
+  }
+}
+
+function renderWordList() {
+  const el = document.getElementById('word-list');
+  el.innerHTML = '';
+  document.getElementById('total-count').textContent = placedWords.length;
+  document.getElementById('found-count').textContent = 0;
+
+  placedWords.forEach(pw => {
+    const item = document.createElement('div');
+    item.className = 'word-item';
+    item.innerHTML = `<div class="dot"></div><span class="tick">✓</span>${pw.word}`;
+    item.dataset.word = pw.word;
+
+    item.addEventListener('mouseenter', () => {
+      document.getElementById('hint-text').textContent = pw.hint;
+    });
+    item.addEventListener('mouseleave', () => {
+      document.getElementById('hint-text').textContent = 'Hover over a word in the list to see its definition.';
+    });
+    el.appendChild(item);
+  });
+}
+
+function updateStats() {
+  const found = foundWords.size;
+  const total = placedWords.length;
+  document.getElementById('st-found').textContent = found;
+  document.getElementById('st-left').textContent  = total - found;
+  document.getElementById('found-count').textContent = found;
+  document.getElementById('words-remaining').textContent = (total-found) + ' remaining';
+}
+
+// ═══════════════════════════════════════════════════════════
+// SELECTION
+// ═══════════════════════════════════════════════════════════
+function startSelect(r, c, e) {
+  if (gameOver) return;
+  selecting   = true;
+  selectStart = [r, c];
+  selectCells = [[r, c]];
+  highlightSelecting();
+}
+
+function moveSelect(r, c, e) {
+  if (!selecting) return;
+  const [sr, sc] = selectStart;
+  selectCells = getCellsInLine(sr, sc, r, c);
+  highlightSelecting();
+}
+
+function handleTouchMove(e) {
+  if (!selecting) return;
+  const touch = e.touches[0];
+  const el = document.elementFromPoint(touch.clientX, touch.clientY);
+  if (el && el.classList.contains('ws-cell')) {
+    const r = parseInt(el.dataset.r), c = parseInt(el.dataset.c);
+    moveSelect(r, c);
+  }
+}
+
+function endSelect(e) {
+  if (!selecting) return;
+  selecting = false;
+  checkWord();
+  clearSelecting();
+  selectCells = [];
+  selectStart = null;
+}
+
+function getCellsInLine(r1, c1, r2, c2) {
+  const dr = r2-r1, dc = c2-c1;
+  const len = Math.max(Math.abs(dr), Math.abs(dc));
+  if (len === 0) return [[r1,c1]];
+
+  // Snap to closest 8-direction
+  const stepR = dr===0 ? 0 : (dr>0?1:-1);
+  const stepC = dc===0 ? 0 : (dc>0?1:-1);
+
+  // Check if diagonal (both change) vs straight
+  const isDiag = Math.abs(dr)>0 && Math.abs(dc)>0;
+  if (isDiag && Math.abs(dr) !== Math.abs(dc)) {
+    // Not a clean diagonal - snap to whichever is dominant
+    const useR = Math.abs(dr) >= Math.abs(dc);
+    const cells = [];
+    for (let i=0; i<=Math.abs(useR?dr:dc); i++) {
+      cells.push([r1 + (useR?stepR*i:0), c1 + (useR?0:stepC*i)]);
+    }
+    return cells;
+  }
+
+  const cells = [];
+  for (let i=0; i<=len; i++) cells.push([r1+stepR*i, c1+stepC*i]);
+  return cells;
+}
+
+function highlightSelecting() {
+  document.querySelectorAll('.ws-cell.selecting').forEach(el => el.classList.remove('selecting'));
+  selectCells.forEach(([r,c]) => {
+    const el = getCell(r,c);
+    if (el && !el.classList.contains('found')) el.classList.add('selecting');
+  });
+}
+
+function clearSelecting() {
+  document.querySelectorAll('.ws-cell.selecting').forEach(el => el.classList.remove('selecting'));
+}
+
+function getCell(r, c) {
+  return document.querySelector(`[data-r="${r}"][data-c="${c}"]`);
+}
+
+// ═══════════════════════════════════════════════════════════
+// CHECK WORD
+// ═══════════════════════════════════════════════════════════
+function checkWord() {
+  const selected = selectCells.map(([r,c]) => grid[r][c]).join('');
+  const reversed = selected.split('').reverse().join('');
+
+  for (const pw of placedWords) {
+    if (pw.found) continue;
+    if (selected === pw.word || reversed === pw.word) {
+      markFound(pw);
+      return;
+    }
+  }
+}
+
+function markFound(pw) {
+  pw.found = true;
+  foundWords.add(pw.word);
+  const ci = colorIdx % 6;
+  colorIdx++;
+
+  // Highlight cells
+  selectCells.forEach(([r,c]) => {
+    const el = getCell(r,c);
+    if (el) { el.classList.remove('selecting'); el.classList.add('found', `fc${ci}`); }
+  });
+
+  // Strike through word in list
+  const listItem = document.querySelector(`[data-word="${pw.word}"]`);
+  if (listItem) listItem.classList.add('found-word');
+
+  updateStats();
+
+  // Flash hint
+  document.getElementById('hint-text').textContent = `✅ "${pw.word}" — ${pw.hint}`;
+
+  // Check win
+  if (foundWords.size === placedWords.length) showWin();
+}
+
+// ═══════════════════════════════════════════════════════════
+// TIMER
+// ═══════════════════════════════════════════════════════════
+function startTimer() {
+  seconds = 0;
+  updateTimer();
+  timerInterval = setInterval(() => { seconds++; updateTimer(); }, 1000);
+}
+
+function stopTimer() {
+  clearInterval(timerInterval);
+}
+
+function updateTimer() {
+  const m = String(Math.floor(seconds/60)).padStart(2,'0');
+  const s = String(seconds%60).padStart(2,'0');
+  const t = `${m}:${s}`;
+  document.getElementById('timer-display').textContent = t;
+}
+
+// ═══════════════════════════════════════════════════════════
+// WIN
+// ═══════════════════════════════════════════════════════════
+function showWin() {
+  stopTimer();
+  gameOver = true;
+  const m = String(Math.floor(seconds/60)).padStart(2,'0');
+  const s = String(seconds%60).padStart(2,'0');
+  document.getElementById('win-time-val').textContent = `${m}:${s}`;
+  document.getElementById('winner-name').value = '';
+  document.getElementById('ws-win-overlay').classList.add('show');
+  setTimeout(() => document.getElementById('winner-name').focus(), 200);
+}
+
+// ═══════════════════════════════════════════════════════════
+// GLOBAL MOUSE UP (catches mouseup outside grid)
+// ═══════════════════════════════════════════════════════════
+document.addEventListener('mouseup', () => {
+  if (selecting) { selecting=false; checkWord(); clearSelecting(); selectCells=[]; selectStart=null; }
+});
+
+// ═══════════════════════════════════════════════════════════
+// START
+// ═══════════════════════════════════════════════════════════
+wsRenderLB();
+newGame();
+
+
+// ─── ONLY CONNECT ───────────────────────────────────────────
+const PUZZLES = [
+  { name:"Puzzle 1", groups:[
+    { cat:"Types of computer network",  col:"c1", words:["LAN","WAN","MAN","PAN"] },
+    { cat:"Parts of the CPU",           col:"c2", words:["ALU","CU","Cache","Registers"] },
+    { cat:"Programming constructs",     col:"c3", words:["Sequence","Selection","Iteration","Recursion"] },
+    { cat:"Cyber attacks",              col:"c4", words:["Phishing","DDoS","Brute Force","SQL Injection"] }
+  ]},
+  { name:"Puzzle 2", groups:[
+    { cat:"Output devices",             col:"c1", words:["Monitor","Printer","Speaker","Projector"] },
+    { cat:"Python data types",          col:"c2", words:["Integer","String","Boolean","Float"] },
+    { cat:"Secondary storage types",    col:"c3", words:["HDD","SSD","Optical","Flash"] },
+    { cat:"Encryption terms",           col:"c4", words:["Cipher","Key","Plaintext","Ciphertext"] }
+  ]},
+  { name:"Puzzle 3", groups:[
+    { cat:"Sorting algorithms",         col:"c1", words:["Bubble","Merge","Quick","Insertion"] },
+    { cat:"Logic gate types",           col:"c2", words:["AND","OR","NOT","XOR"] },
+    { cat:"Units of data storage",      col:"c3", words:["Kilobyte","Megabyte","Gigabyte","Terabyte"] },
+    { cat:"Network protocols",          col:"c4", words:["HTTP","FTP","SMTP","TCP"] }
+  ]},
+  { name:"Puzzle 4", groups:[
+    { cat:"Input devices",              col:"c1", words:["Keyboard","Mouse","Microphone","Scanner"] },
+    { cat:"Programming error types",    col:"c2", words:["Syntax","Logic","Runtime","Semantic"] },
+    { cat:"Database concepts",          col:"c3", words:["Primary Key","Foreign Key","Query","Record"] },
+    { cat:"Computational thinking",     col:"c4", words:["Decomposition","Abstraction","Pattern Recognition","Algorithm"] }
+  ]},
+  { name:"Puzzle 5", groups:[
+    { cat:"Binary number system terms", col:"c1", words:["Bit","Byte","Nibble","Word"] },
+    { cat:"Types of software",          col:"c2", words:["Operating System","Compiler","Interpreter","Assembler"] },
+    { cat:"Network hardware devices",   col:"c3", words:["Router","Switch","Hub","Modem"] },
+    { cat:"Python keywords",            col:"c4", words:["def","return","import","lambda"] }
+  ]},
+  { name:"Puzzle 6", groups:[
+    { cat:"HTML elements",              col:"c1", words:["head","body","div","p"] },
+    { cat:"Searching algorithms",       col:"c2", words:["Linear","Binary","Depth-First","Breadth-First"] },
+    { cat:"Malware types",              col:"c3", words:["Virus","Worm","Trojan","Ransomware"] },
+    { cat:"SQL commands",               col:"c4", words:["SELECT","INSERT","UPDATE","DELETE"] }
+  ]},
+  { name:"Puzzle 7", groups:[
+    { cat:"Number systems",             col:"c1", words:["Binary","Denary","Hexadecimal","Octal"] },
+    { cat:"Data structures",            col:"c2", words:["Array","List","Dictionary","Queue"] },
+    { cat:"CPU performance factors",    col:"c3", words:["Clock Speed","Cores","Cache Size","Bus Width"] },
+    { cat:"Principles of OOP",          col:"c4", words:["Encapsulation","Inheritance","Polymorphism","Abstraction"] }
+  ]},
+  { name:"Puzzle 8", groups:[
+    { cat:"Types of memory",            col:"c1", words:["RAM","ROM","Cache","Virtual Memory"] },
+    { cat:"Network topologies",         col:"c2", words:["Star","Bus","Ring","Mesh"] },
+    { cat:"Legal and ethical CS issues",col:"c3", words:["Copyright","Privacy","Piracy","Data Protection"] },
+    { cat:"Python loop control words",  col:"c4", words:["break","continue","pass","else"] }
+  ]}
+];
+
+// STATE
+
+let pIdx=0, lives=4, sel=[], solved=[], tiles=[];
+
+// BOOT
+function boot() {
+  const ps = document.getElementById('psel');
+  PUZZLES.forEach((p,i) => {
+    const b = document.createElement('button');
+    b.className = 'pbtn'+(i===0?' active':'');
+    b.textContent = p.name;
+    b.onclick = () => {
+      if (i===pIdx) return;
+      document.querySelectorAll('.pbtn').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');
+      load(i);
+    };
+    ps.appendChild(b);
+  });
+  load(0);
+};
+
+function load(idx) {
+  pIdx=idx; lives=4; sel=[]; solved=[];
+  tiles=[];
+  PUZZLES[idx].groups.forEach((g,gi) =>
+    g.words.forEach(w => tiles.push({w,gi,done:false}))
+  );
+  shuffle(tiles);
+  ocRenderLives();
+  ocRenderGrid();
+  document.getElementById('sbgroup').innerHTML='';
+  document.getElementById('endPanel').className='endpanel';
+  setStatus('Select four tiles you think are connected','');
+  document.getElementById('goBtn').disabled=true;
+}
+
+function restart() { load(pIdx); }
+
+// RENDER
+function ocRenderLives() {
+  const b=document.getElementById('livesBox');
+  b.innerHTML='';
+  for(let i=0;i<4;i++){
+    const d=document.createElement('div');
+    d.className='life'+(i>=lives?' lost':'');
+    b.appendChild(d);
+  }
+}
+
+function ocRenderGrid() {
+  const g=document.getElementById('grid');
+  g.innerHTML='';
+  tiles.forEach((t,i) => {
+    if(t.done) return;
+    const el=document.createElement('div');
+    el.className='tile';
+    el.dataset.i=i;
+    el.textContent=t.w;
+    el.addEventListener('click',()=>clickTile(i,el));
+    g.appendChild(el);
+  });
+}
+
+// INTERACTION
+function clickTile(i,el) {
+  const p=sel.indexOf(i);
+  if(p>-1){ sel.splice(p,1); el.classList.remove('sel'); }
+  else {
+    if(sel.length>=4) return;
+    sel.push(i); el.classList.add('sel');
+  }
+  document.getElementById('goBtn').disabled=sel.length!==4;
+  if(sel.length<4) setStatus('Select four tiles you think are connected','');
+}
+
+function desel() {
+  sel=[];
+  document.querySelectorAll('.tile.sel').forEach(t=>t.classList.remove('sel'));
+  document.getElementById('goBtn').disabled=true;
+  setStatus('Select four tiles you think are connected','');
+}
+
+function doShuffle() {
+  const u=tiles.map((t,i)=>t.done?null:i).filter(i=>i!==null);
+  for(let i=u.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [tiles[u[i]],tiles[u[j]]]=[tiles[u[j]],tiles[u[i]]];
+  }
+  desel(); ocRenderGrid();
+}
+
+// GUESS
+function doSubmit() {
+  if(sel.length!==4) return;
+  const gs=sel.map(i=>tiles[i].gi);
+  if(gs.every(g=>g===gs[0])) correct(gs[0]);
+  else wrong(gs);
+}
+
+function correct(gi) {
+  document.querySelectorAll('.tile').forEach(el=>{
+    if(sel.includes(+el.dataset.i)) el.classList.add('pop');
+  });
+  setTimeout(()=>{
+    sel.forEach(i=>tiles[i].done=true);
+    solved.push(gi);
+    sel=[];
+    addBanner(PUZZLES[pIdx].groups[gi]);
+    ocRenderGrid();
+    document.getElementById('goBtn').disabled=true;
+    if(solved.length===4) setTimeout(()=>endGame(true),350);
+    else setStatus('Correct! Keep going...','ok');
+  },570);
+}
+
+function wrong(gs) {
+  const cnt={};
+  gs.forEach(g=>cnt[g]=(cnt[g]||0)+1);
+  const near=Math.max(...Object.values(cnt))===3;
+  document.querySelectorAll('.tile').forEach(el=>{
+    if(sel.includes(+el.dataset.i)){
+      el.classList.add('shake');
+      setTimeout(()=>el.classList.remove('shake'),500);
+    }
+  });
+  lives--; ocRenderLives();
+  setStatus(near?'One away! Almost there...':'Incorrect, try again!',near?'near':'bad');
+  desel();
+  if(lives<=0) setTimeout(()=>endGame(false),480);
+}
+
+function addBanner(g) {
+  const c=document.getElementById('sbgroup');
+  const b=document.createElement('div');
+  b.className='sb '+g.col;
+  b.innerHTML='<div class="sbcat">'+g.cat+'</div><div class="sbwords">'+g.words.join(' &middot; ')+'</div>';
+  c.appendChild(b);
+}
+
+function endGame(win) {
+  if(!win){
+    PUZZLES[pIdx].groups.forEach((g,gi)=>{
+      if(!solved.includes(gi)) addBanner(g);
+    });
+    document.querySelectorAll('.tile').forEach(t=>t.classList.add('gone'));
+  }
+  const p=document.getElementById('endPanel');
+  p.className='endpanel show '+(win?'win':'lose');
+  document.getElementById('etitle').textContent=win?'Solved!':'Game Over';
+  document.getElementById('esub').textContent=win?'You found all four groups!':'The answers are revealed above.';
+  document.getElementById('escore').textContent=solved.length+' / 4 groups found  |  '+(4-lives)+' mistake'+(4-lives!==1?'s':'');
+}
+
+// UTILS
+function setStatus(msg,cls){
+  const el=document.getElementById('status');
+  el.textContent=msg;
+  el.className='status'+(cls?' '+cls:'');
+}
+
+
+// LIGHT MODE
+let ltOn=false;
+
+
+// SUPERPOWER
+let spOn=false;
+
+
+// COLOUR FILTER
+let cfOn='';
+const CF=['cf-blue','cf-green','cf-yellow','cf-pink'];
+
+function toggleFD(){ document.getElementById('fdMenu').classList.toggle('open'); }
+function closeFD(){ document.getElementById('fdMenu').classList.remove('open'); }
+document.addEventListener('click',e=>{
+  const w=document.getElementById('fdWrap');
+  if(w&&!w.contains(e.target)) closeFD();
+});
+
+// KEYBOARD
+document.addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&sel.length===4) doSubmit();
+  if(e.key==='Escape') desel();
+});
+
+// ─── INIT ───────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function() {
+  const nd    = document.getElementById('name-display');
+  const modal = document.getElementById('name-modal');
+  if (playerName) {
+    if (nd) nd.textContent = playerName;
+  } else {
+    if (modal) { modal.style.display = 'flex'; setTimeout(()=>{const i=document.getElementById('name-modal-input');if(i)i.focus();},100); }
+  }
+  initWordle(); initQuiz(); initConnect4(); initHangman();
+  boot();
+  wsRenderLB();
+});
+</script>
+</body>
+</html>
