@@ -726,7 +726,12 @@ body.light .tile:hover:not(.sel):not(.off) { background:rgba(26,95,192,.06); }
   }
   @media(max-width:500px) { .ws-cell { width:26px; height:26px; font-size:.6rem; } }
   body.light .ws-cell { color:#0a1825; }
-  /* selection handled via inline styles in JS for guaranteed visibility */
+  .ws-cell.selecting {
+    background:rgba(0,229,255,.08);
+    border-color:var(--accent);
+    color:var(--accent);
+    box-shadow: inset 0 0 0 2px var(--accent);
+  }
   .ws-cell.found { color:#000 !important; border-color:transparent !important; font-weight:900; text-shadow: 0 0 2px rgba(0,0,0,.3); }
   .ws-cell.fc0 { background:var(--found1); }
   .ws-cell.fc1 { background:var(--found2); }
@@ -2362,34 +2367,19 @@ function renderGrid() {
       cell.className = 'ws-cell';
       cell.textContent = grid[r][c];
       cell.dataset.r = r; cell.dataset.c = c;
+
+      // Mouse events
+      cell.addEventListener('mousedown',  e => startSelect(r,c,e));
+      cell.addEventListener('mouseover',  e => moveSelect(r,c,e));
+      cell.addEventListener('mouseup',    e => endSelect(e));
+      // Touch events
+      cell.addEventListener('touchstart', e => { e.preventDefault(); startSelect(r,c,e); }, {passive:false});
+      cell.addEventListener('touchmove',  e => { e.preventDefault(); handleTouchMove(e); }, {passive:false});
+      cell.addEventListener('touchend',   e => { e.preventDefault(); endSelect(e); }, {passive:false});
+
       el.appendChild(cell);
     }
   }
-
-  // Attach events to grid container (delegation) - much more accurate
-  el.onmousedown = e => {
-    const t = e.target.closest('.ws-cell');
-    if (t) startSelect(+t.dataset.r, +t.dataset.c, e);
-  };
-  el.onmouseover = e => {
-    if (!selecting || e.buttons === 0) return;  // e.buttons===0 means no button held
-    const t = e.target.closest('.ws-cell');
-    if (t) moveSelect(+t.dataset.r, +t.dataset.c, e);
-  };
-  el.onmouseup = e => endSelect(e);
-  el.ontouchstart = e => {
-    e.preventDefault();
-    const t = e.target.closest('.ws-cell');
-    if (t) startSelect(+t.dataset.r, +t.dataset.c, e);
-  };
-  el.ontouchmove = e => {
-    e.preventDefault();
-    const touch = e.touches[0];
-    const over  = document.elementFromPoint(touch.clientX, touch.clientY);
-    const t     = over && over.closest('.ws-cell');
-    if (t) moveSelect(+t.dataset.r, +t.dataset.c, e);
-  };
-  el.ontouchend = e => { e.preventDefault(); endSelect(e); };
 }
 
 function renderWordList() {
@@ -2461,54 +2451,41 @@ function endSelect(e) {
 }
 
 function getCellsInLine(r1, c1, r2, c2) {
-  if (r1===r2 && c1===c2) return [[r1,c1]];
   const dr = r2-r1, dc = c2-c1;
-
-  // Snap drag vector to nearest of 8 directions using atan2
-  const angle   = Math.atan2(dr, dc) * 180 / Math.PI;
-  const snapped = Math.round(angle / 45) * 45;
-  const stepC   = Math.round(Math.cos(snapped * Math.PI / 180)); // col step
-  const stepR   = Math.round(Math.sin(snapped * Math.PI / 180)); // row step
-
-  // Length along the snapped direction
   const len = Math.max(Math.abs(dr), Math.abs(dc));
+  if (len === 0) return [[r1,c1]];
+
+  // Snap to closest 8-direction
+  const stepR = dr===0 ? 0 : (dr>0?1:-1);
+  const stepC = dc===0 ? 0 : (dc>0?1:-1);
+
+  // Check if diagonal (both change) vs straight
+  const isDiag = Math.abs(dr)>0 && Math.abs(dc)>0;
+  if (isDiag && Math.abs(dr) !== Math.abs(dc)) {
+    // Not a clean diagonal - snap to whichever is dominant
+    const useR = Math.abs(dr) >= Math.abs(dc);
+    const cells = [];
+    for (let i=0; i<=Math.abs(useR?dr:dc); i++) {
+      cells.push([r1 + (useR?stepR*i:0), c1 + (useR?0:stepC*i)]);
+    }
+    return cells;
+  }
 
   const cells = [];
-  for (let i = 0; i <= len; i++) {
-    const r = r1 + stepR * i;
-    const c = c1 + stepC * i;
-    if (r >= 0 && r < gridSize && c >= 0 && c < gridSize) cells.push([r, c]);
-  }
+  for (let i=0; i<=len; i++) cells.push([r1+stepR*i, c1+stepC*i]);
   return cells;
 }
 
 function highlightSelecting() {
-  // Clear previous selection using inline style (immune to CSS cascade issues)
-  document.querySelectorAll('#ws-grid .ws-cell').forEach(el => {
-    if (!el.classList.contains('found')) {
-      el.style.background = '';
-      el.style.color = '';
-      el.style.outline = '';
-    }
-  });
+  document.querySelectorAll('.ws-cell.selecting').forEach(el => el.classList.remove('selecting'));
   selectCells.forEach(([r,c]) => {
     const el = getCell(r,c);
-    if (el && !el.classList.contains('found')) {
-      el.style.background = 'rgba(255,200,0,0.5)';
-      el.style.color = '#000';
-      el.style.outline = '2px solid #cc8800';
-    }
+    if (el && !el.classList.contains('found')) el.classList.add('selecting');
   });
 }
 
 function clearSelecting() {
-  document.querySelectorAll('#ws-grid .ws-cell').forEach(el => {
-    if (!el.classList.contains('found')) {
-      el.style.background = '';
-      el.style.color = '';
-      el.style.outline = '';
-    }
-  });
+  document.querySelectorAll('.ws-cell.selecting').forEach(el => el.classList.remove('selecting'));
 }
 
 function getCell(r, c) {
