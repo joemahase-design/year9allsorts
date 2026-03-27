@@ -664,6 +664,141 @@ body.light .tile:hover:not(.sel):not(.off) { background:rgba(26,95,192,.06); }
 
   /* ── Word Search CSS ── */
 
+  /* ── WORD SEARCH LAYOUT ── */
+  .main {
+    position:relative; z-index:5;
+    display:grid;
+    grid-template-columns:1fr 280px;
+    gap:1.2rem;
+    padding:1.2rem 1.5rem;
+    max-width:1100px; margin:0 auto;
+  }
+  @media(max-width:720px) {
+    .main { grid-template-columns:1fr; }
+    .sidebar { order:-1; }
+  }
+  .grid-wrap { display:flex; flex-direction:column; align-items:center; gap:1rem; }
+  .grid-status { font-family:'Share Tech Mono',monospace; font-size:.7rem; color:var(--dim); letter-spacing:.08em; display:flex; gap:1.5rem; }
+  .grid-status span { color:var(--accent); }
+  #ws-grid {
+    display:inline-grid;
+    gap:2px;
+    background:var(--surface);
+    border:1px solid var(--border);
+    padding:8px;
+    box-shadow:0 0 40px rgba(0,229,255,.06), inset 0 0 30px rgba(0,0,0,.3);
+    cursor:crosshair;
+    touch-action:none;
+  }
+  .ws-cell {
+    width:32px; height:32px;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Orbitron',monospace; font-size:.75rem; font-weight:700;
+    color:var(--dim); background:transparent;
+    border:1px solid transparent;
+    transition:color .1s, background .1s, border-color .1s;
+    border-radius:2px; position:relative;
+  }
+  @media(max-width:500px) { .ws-cell { width:26px; height:26px; font-size:.6rem; } }
+  body.light .ws-cell { color:#0a1825; }
+  .ws-cell.selecting { background:rgba(0,229,255,.12); border-color:var(--accent); color:var(--accent); }
+  .ws-cell.found { color:#000 !important; border-color:transparent !important; font-weight:900; }
+  .ws-cell.fc0 { background:var(--found1); }
+  .ws-cell.fc1 { background:var(--found2); }
+  .ws-cell.fc2 { background:var(--found3); }
+  .ws-cell.fc3 { background:var(--found4); }
+  .ws-cell.fc4 { background:var(--found5); }
+  .ws-cell.fc5 { background:var(--found6); }
+  body.light .ws-cell.fc0 { color:#fff; }
+  body.light .ws-cell.fc1 { color:#fff; }
+  body.light .ws-cell.fc2 { color:#fff; }
+  body.light .ws-cell.fc3 { color:#000; }
+  body.light .ws-cell.fc4 { color:#fff; }
+  body.light .ws-cell.fc5 { color:#fff; }
+  @keyframes flip { 0%{transform:scaleY(1)} 50%{transform:scaleY(0)} 100%{transform:scaleY(1)} }
+  @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-5px)} 75%{transform:translateX(5px)} }
+  .ws-cell.flip  { animation:flip .4s ease; }
+
+  /* ── WORD SEARCH SIDEBAR ── */
+  .sidebar {}
+  .words-panel { background:var(--surface); border:1px solid var(--border); padding:1rem; margin-bottom:1rem; }
+  .words-title { font-family:'Orbitron',monospace; font-size:.7rem; color:var(--accent); letter-spacing:.12em; margin-bottom:.9rem; padding-bottom:.5rem; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
+  .words-title span { color:var(--dim); font-size:.62rem; }
+  .word-list { display:flex; flex-direction:column; gap:.3rem; }
+  .word-item { font-family:'Share Tech Mono',monospace; font-size:.72rem; color:var(--text); padding:.3rem .5rem; border:1px solid transparent; display:flex; align-items:center; gap:.5rem; transition:all .2s; }
+  .word-item.found-word { color:var(--dim) !important; text-decoration:line-through; opacity:.6; }
+  .word-item .tick { opacity:0; color:var(--accent3); font-size:.9rem; }
+  .word-item.found-word .tick { opacity:1; }
+  .word-item .dot { width:6px; height:6px; border-radius:50%; background:var(--border); flex-shrink:0; }
+  .word-item.found-word .dot { background:var(--accent3); }
+  .hint-panel { background:var(--surface); border:1px solid var(--border); padding:1rem; margin-bottom:1rem; }
+  .hint-title { font-family:'Orbitron',monospace; font-size:.68rem; color:var(--accent2); letter-spacing:.1em; margin-bottom:.7rem; }
+  #hint-text { font-family:'Share Tech Mono',monospace; font-size:.7rem; line-height:1.7; min-height:2.5rem; color:var(--dim); }
+  .stats-panel { background:var(--surface); border:1px solid var(--border); padding:.8rem 1rem; display:grid; grid-template-columns:1fr 1fr; gap:.5rem; }
+  .stat { text-align:center; }
+  .stat-v { font-family:'Orbitron',monospace; font-size:1.2rem; font-weight:700; color:var(--accent); }
+  .stat-l { font-family:'Share Tech Mono',monospace; font-size:.58rem; color:var(--dim); text-transform:uppercase; margin-top:1px; }
+
+  /* ── WS LEADERBOARD PANEL ── */
+  .lb-panel { background:var(--surface); border:1px solid var(--border); padding:1rem; margin-top:1rem; }
+  .lb-title { font-family:'Orbitron',monospace; font-size:.7rem; color:var(--yellow); letter-spacing:.12em; margin-bottom:.8rem; padding-bottom:.5rem; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
+  .lb-title button { font-family:'Share Tech Mono',monospace; font-size:.6rem; background:transparent; border:1px solid var(--border); color:var(--dim); padding:.15rem .5rem; cursor:pointer; transition:all .15s; }
+  .lb-title button:hover { border-color:var(--accent2); color:var(--accent2); }
+  .lb-entry { display:flex; align-items:center; gap:.5rem; padding:.32rem .4rem; margin-bottom:2px; font-family:'Share Tech Mono',monospace; font-size:.68rem; }
+  .lb-entry:nth-child(1) { color:var(--yellow); }
+  .lb-entry:nth-child(2) { color:#c0c0c0; }
+  .lb-entry:nth-child(3) { color:#cd7f32; }
+  .lb-rank { min-width:22px; font-family:'Orbitron',monospace; font-size:.65rem; }
+  .lb-name { flex:1; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .lb-time { color:var(--accent); font-family:'Orbitron',monospace; font-size:.65rem; }
+  .lb-diff { font-size:.55rem; color:var(--dim); }
+  .lb-empty { font-family:'Share Tech Mono',monospace; font-size:.68rem; color:var(--dim); text-align:center; padding:.8rem 0; }
+
+  /* ── WS WIN BOX ── */
+  #ws-win-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.85); z-index:200; align-items:center; justify-content:center; }
+  #ws-win-overlay.show { display:flex; }
+  .win-box { background:var(--surface); border:1px solid var(--accent); padding:2.5rem 2rem; max-width:380px; width:90%; text-align:center; box-shadow:0 0 60px rgba(0,229,255,.2); animation:popIn .4s cubic-bezier(.175,.885,.32,1.275); }
+  @keyframes popIn { from{transform:scale(.8);opacity:0} to{transform:scale(1);opacity:1} }
+  .win-emoji { font-size:3rem; margin-bottom:.8rem; display:block; }
+  .win-title { font-family:'Orbitron',monospace; font-size:1.3rem; font-weight:900; color:var(--accent); margin-bottom:.5rem; text-shadow:0 0 20px rgba(0,229,255,.5); }
+  .win-time { font-family:'Share Tech Mono',monospace; font-size:.8rem; color:var(--dim); margin-bottom:1.5rem; }
+  .win-time span { color:var(--yellow); font-size:1.1rem; }
+  .win-input { width:100%; font-family:'Share Tech Mono',monospace; font-size:.9rem; text-align:center; background:var(--surface2); border:1px solid var(--border); color:var(--text); padding:.5rem .8rem; outline:none; margin-bottom:.8rem; letter-spacing:.05em; }
+  .win-input:focus { border-color:var(--accent); }
+  .play-again { font-family:'Orbitron',monospace; font-size:.75rem; font-weight:700; padding:.7rem 1.8rem; background:var(--accent); border:none; color:var(--bg); cursor:pointer; transition:all .2s; letter-spacing:.1em; }
+  .play-again:hover { box-shadow:0 0 24px rgba(0,229,255,.5); transform:translateY(-2px); }
+  .dir-legend { font-family:'Share Tech Mono',monospace; font-size:.62rem; color:var(--dim); text-align:center; letter-spacing:.05em; }
+
+
+
+  /* ── TEACHER DASHBOARD ── */
+  #teacher-modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,.88); z-index:600; align-items:center; justify-content:center; }
+  #teacher-modal.open { display:flex; }
+  .teacher-box { background:var(--surface); border:1px solid var(--accent2); padding:1.8rem; max-width:420px; width:92%; }
+  .teacher-title { font-family:'Orbitron',monospace; font-size:.9rem; color:var(--accent2); letter-spacing:.1em; margin-bottom:.4rem; }
+  .teacher-sub   { font-family:'Share Tech Mono',monospace; font-size:.7rem; color:var(--dim); margin-bottom:1.2rem; line-height:1.6; }
+  #teacher-pin-input { width:100%; font-family:'Orbitron',monospace; font-size:1.4rem; letter-spacing:.3em; text-align:center; background:var(--surface2); border:1px solid var(--border); color:var(--text); padding:.55rem 1rem; outline:none; margin-bottom:.4rem; }
+  #teacher-pin-input:focus { border-color:var(--accent2); }
+  #teacher-pin-error { font-family:'Share Tech Mono',monospace; font-size:.68rem; color:var(--red); min-height:1.2rem; margin-bottom:.6rem; }
+  .teacher-btn { width:100%; font-family:'Orbitron',monospace; font-size:.72rem; font-weight:700; letter-spacing:.1em; padding:.65rem; background:var(--accent2); border:none; color:#fff; cursor:pointer; transition:all .2s; margin-bottom:.5rem; }
+  .teacher-btn:hover { opacity:.88; }
+  .teacher-btn-sec { background:transparent; border:1px solid var(--border); color:var(--dim); }
+  .teacher-btn-sec:hover { border-color:var(--accent2); color:var(--accent2); background:transparent; opacity:1; }
+  #teacher-view { display:none; }
+  .teacher-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:.6rem; margin-bottom:1.2rem; }
+  .teacher-stat { background:var(--surface2); border:1px solid var(--border); padding:.6rem; text-align:center; }
+  .teacher-stat-v { font-family:'Orbitron',monospace; font-size:1.3rem; font-weight:700; color:var(--accent); }
+  .teacher-stat-l { font-family:'Share Tech Mono',monospace; font-size:.58rem; color:var(--dim); text-transform:uppercase; }
+  .teacher-lb { max-height:320px; overflow-y:auto; }
+  .teacher-row { display:flex; align-items:center; gap:.5rem; padding:.4rem .5rem; margin-bottom:2px; background:var(--surface2); border:1px solid var(--border); font-family:'Share Tech Mono',monospace; font-size:.68rem; }
+  .teacher-rank { min-width:24px; font-family:'Orbitron',monospace; font-size:.65rem; color:var(--accent); }
+  .teacher-name { flex:1; color:var(--text); }
+  .teacher-game { color:var(--dim); font-size:.6rem; min-width:70px; }
+  .teacher-score { font-family:'Orbitron',monospace; font-size:.85rem; font-weight:700; color:var(--yellow); }
+  .teacher-nav-btn { font-family:'Share Tech Mono',monospace; font-size:.65rem; padding:.25rem .65rem; background:transparent; border:1px solid var(--border); color:var(--dim); cursor:pointer; margin-right:.3rem; transition:all .15s; }
+  .teacher-nav-btn.active { border-color:var(--accent2); color:var(--accent2); }
+  .teacher-actions { display:flex; gap:.4rem; margin-top:.8rem; }
+
 </style>
 </head>
 <body>
@@ -689,11 +824,54 @@ body.light .tile:hover:not(.sel):not(.off) { background:rgba(26,95,192,.06); }
   </div>
 </div>
 
+<!-- TEACHER DASHBOARD MODAL -->
+<div id="teacher-modal">
+  <div class="teacher-box">
+    <!-- PIN screen -->
+    <div id="teacher-pin-screen">
+      <div class="teacher-title">🖥 TEACHER DASHBOARD</div>
+      <div class="teacher-sub">Enter your PIN to access the class leaderboard and score summary.</div>
+      <input type="password" id="teacher-pin-input" placeholder="····" maxlength="8"
+        onkeydown="if(event.key==='Enter')teacherCheckPin()"/>
+      <div id="teacher-pin-error"></div>
+      <button class="teacher-btn" onclick="teacherCheckPin()">ENTER DASHBOARD →</button>
+      <button class="teacher-btn teacher-btn-sec" onclick="teacherClose()">CANCEL</button>
+    </div>
+    <!-- Dashboard screen -->
+    <div id="teacher-view">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+        <div class="teacher-title">🖥 TEACHER DASHBOARD</div>
+        <button class="teacher-nav-btn" onclick="teacherClose()" style="border-color:var(--red);color:var(--red)">✕ CLOSE</button>
+      </div>
+      <div class="teacher-stats">
+        <div class="teacher-stat"><div class="teacher-stat-v" id="t-students">0</div><div class="teacher-stat-l">Students</div></div>
+        <div class="teacher-stat"><div class="teacher-stat-v" id="t-plays">0</div><div class="teacher-stat-l">Plays</div></div>
+        <div class="teacher-stat"><div class="teacher-stat-v" id="t-avg">—</div><div class="teacher-stat-l">Avg Score</div></div>
+      </div>
+      <div style="margin-bottom:.6rem;display:flex;gap:.3rem;flex-wrap:wrap;">
+        <button class="teacher-nav-btn active" onclick="teacherFilter('all',this)">All Games</button>
+        <button class="teacher-nav-btn" onclick="teacherFilter('Wordle',this)">Wordle</button>
+        <button class="teacher-nav-btn" onclick="teacherFilter('Quiz',this)">Quiz</button>
+        <button class="teacher-nav-btn" onclick="teacherFilter('Hangman',this)">Hangman</button>
+        <button class="teacher-nav-btn" onclick="teacherFilter('Python',this)">Python</button>
+      </div>
+      <div class="teacher-lb" id="teacher-lb"></div>
+      <div class="teacher-actions">
+        <button class="teacher-btn teacher-btn-sec" style="font-size:.6rem;padding:.4rem;"
+          onclick="teacherExportCSV()">⬇ EXPORT CSV</button>
+        <button class="teacher-btn teacher-btn-sec" style="font-size:.6rem;padding:.4rem;border-color:var(--red);color:var(--red);"
+          onclick="if(confirm('Clear all scores?'))teacherClearAll()">🗑 CLEAR ALL</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- NAME BAR (shown after registration) -->
 <div id="name-bar" style="background:var(--surface2);border-bottom:1px solid var(--border);padding:.4rem 1.2rem;display:flex;align-items:center;gap:.8rem;position:relative;z-index:20;flex-wrap:wrap;">
   <span style="font-family:'Share Tech Mono',monospace;font-size:.7rem;color:var(--text-dim);">PLAYING AS:</span>
   <span id="name-display" style="font-family:'Orbitron',monospace;font-size:.78rem;color:var(--accent);font-weight:700;"></span>
   <button onclick="changeName()" style="font-family:'Share Tech Mono',monospace;font-size:.62rem;background:transparent;border:1px solid var(--border);color:var(--dim);padding:.2rem .55rem;cursor:pointer;margin-left:.3rem;">✏ CHANGE</button>
+  <button onclick="teacherOpen()" style="font-family:'Share Tech Mono',monospace;font-size:.62rem;background:transparent;border:1px solid var(--accent2);color:var(--accent2);padding:.2rem .65rem;cursor:pointer;margin-left:auto;">🖥 TEACHER</button>
   <span style="font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--text-dim);margin-left:auto;">Scores go to the class leaderboard 📡</span>
 </div>
 
@@ -2622,6 +2800,130 @@ document.addEventListener('DOMContentLoaded', function() {
   boot();
   wsRenderLB();
 });
+
+// ═══════════════════════════════════════════════════════════
+// TEACHER DASHBOARD
+// ═══════════════════════════════════════════════════════════
+const TEACHER_PIN = '1984';
+let teacherCurrentFilter = 'all';
+
+function teacherOpen() {
+  const modal = document.getElementById('teacher-modal');
+  const pinScreen = document.getElementById('teacher-pin-screen');
+  const view = document.getElementById('teacher-view');
+  if (modal) {
+    modal.classList.add('open');
+    pinScreen.style.display = 'block';
+    view.style.display = 'none';
+    document.getElementById('teacher-pin-input').value = '';
+    document.getElementById('teacher-pin-error').textContent = '';
+    setTimeout(() => document.getElementById('teacher-pin-input').focus(), 100);
+  }
+}
+
+function teacherClose() {
+  const modal = document.getElementById('teacher-modal');
+  if (modal) modal.classList.remove('open');
+}
+
+function teacherCheckPin() {
+  const pin = document.getElementById('teacher-pin-input').value;
+  const err = document.getElementById('teacher-pin-error');
+  if (pin !== TEACHER_PIN) {
+    err.textContent = '❌ Incorrect PIN';
+    document.getElementById('teacher-pin-input').value = '';
+    document.getElementById('teacher-pin-input').focus();
+    return;
+  }
+  document.getElementById('teacher-pin-screen').style.display = 'none';
+  document.getElementById('teacher-view').style.display = 'block';
+  teacherLoadScores();
+}
+
+function teacherLoadScores() {
+  if (!GS_URL) { teacherRender(); return; }
+  const cb = 'tcb_' + Date.now();
+  const t = setTimeout(() => { delete window[cb]; teacherRender(); }, 8000);
+  window[cb] = function(data) {
+    clearTimeout(t); delete window[cb];
+    if (data && data.status === 'ok' && Array.isArray(data.scores)) {
+      // Merge GS scores with local
+      const local = JSON.parse(store.get('y9arena_scores') || '[]');
+      const merged = [...data.scores];
+      local.forEach(e => {
+        if (!merged.some(s => s.name===e.name && s.date===e.date && s.game===e.game))
+          merged.push(e);
+      });
+      store.set('y9arena_scores', JSON.stringify(merged));
+    }
+    teacherRender();
+  };
+  const s = document.createElement('script');
+  s.src = GS_URL + '?action=getScores&year=Y9&callback=' + cb + '&t=' + Date.now();
+  s.onerror = () => { clearTimeout(t); delete window[cb]; teacherRender(); };
+  document.head.appendChild(s);
+}
+
+function teacherRender() {
+  const all = JSON.parse(store.get('y9arena_scores') || '[]');
+  const filtered = teacherCurrentFilter === 'all'
+    ? all
+    : all.filter(e => (e.game||'').toLowerCase().includes(teacherCurrentFilter.toLowerCase()));
+
+  // Stats
+  const names = [...new Set(filtered.map(e => e.name))];
+  const avg = filtered.length ? Math.round(filtered.reduce((s,e)=>s+(e.score||0),0)/filtered.length) : 0;
+  document.getElementById('t-students').textContent = names.length;
+  document.getElementById('t-plays').textContent    = filtered.length;
+  document.getElementById('t-avg').textContent      = avg || '—';
+
+  // Sort by score desc
+  const sorted = [...filtered].sort((a,b) => (b.score||0) - (a.score||0));
+  const medals = ['🥇','🥈','🥉'];
+  const lb = document.getElementById('teacher-lb');
+  if (!sorted.length) {
+    lb.innerHTML = '<div style="font-family:Share Tech Mono,monospace;font-size:.7rem;color:var(--dim);text-align:center;padding:1rem;">No scores yet</div>';
+    return;
+  }
+  lb.innerHTML = sorted.slice(0,50).map((e,i) => `
+    <div class="teacher-row">
+      <div class="teacher-rank">${medals[i]||'#'+(i+1)}</div>
+      <div class="teacher-name">${e.name||'—'}</div>
+      <div class="teacher-game">${e.game||''}</div>
+      <div class="teacher-score">${e.score||0}</div>
+    </div>`).join('');
+}
+
+function teacherFilter(f, btn) {
+  teacherCurrentFilter = f;
+  document.querySelectorAll('.teacher-nav-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  teacherRender();
+}
+
+function teacherExportCSV() {
+  const all = JSON.parse(store.get('y9arena_scores') || '[]');
+  if (!all.length) { alert('No scores to export'); return; }
+  const rows = [['Name','Game','Score','Detail','Date']];
+  all.forEach(e => rows.push([e.name||'',e.game||'',e.score||0,e.detail||'',e.date||'']));
+  const csv = rows.map(r => r.map(v => '"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  a.download = 'gcse_arena_scores.csv';
+  a.click();
+}
+
+function teacherClearAll() {
+  store.set('y9arena_scores', '[]');
+  teacherRender();
+  renderLeaderboard();
+}
+
+// Close teacher modal on backdrop click
+document.getElementById('teacher-modal').addEventListener('click', function(e) {
+  if (e.target === this) teacherClose();
+});
+
 </script>
 </body>
 </html>
