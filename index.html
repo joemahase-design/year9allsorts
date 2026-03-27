@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CBA — Year 9 Computer Science Arena</title>
+<title>GCSE Computer Science Arena</title>
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600&family=Syne:wght@400;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <style>
 
@@ -254,25 +254,28 @@
   body.light { --tile-bg:#fff; --tile-sel:rgba(26,95,192,0.1); --shad:0 1px 4px rgba(0,0,0,.09); }
   body.superpower { --bg:#fdf8ee; --surface:#fffdf5; --surface2:#f5edd6; --border:#d4c4a0; }
 
-  /* ── Colour filter overlays ── */
-  body.cf-blue::after   { content:''; position:fixed; inset:0; background:rgba(150,200,255,.20); pointer-events:none; z-index:9998; }
-  body.cf-green::after  { content:''; position:fixed; inset:0; background:rgba(140,240,180,.20); pointer-events:none; z-index:9998; }
-  body.cf-yellow::after { content:''; position:fixed; inset:0; background:rgba(255,238,120,.20); pointer-events:none; z-index:9998; }
-  body.cf-pink::after   { content:''; position:fixed; inset:0; background:rgba(255,180,210,.20); pointer-events:none; z-index:9998; }
+  /* ── Colour filter overlay div ── */
+  #colour-overlay {
+    position:fixed; inset:0; pointer-events:none; z-index:9999;
+    opacity:0; transition:opacity .3s; background:transparent;
+  }
+  body.cf-blue   #colour-overlay { background:rgba(150,200,255,.22); opacity:1; }
+  body.cf-green  #colour-overlay { background:rgba(140,240,180,.22); opacity:1; }
+  body.cf-yellow #colour-overlay { background:rgba(255,238,120,.22); opacity:1; }
+  body.cf-pink   #colour-overlay { background:rgba(255,180,210,.22); opacity:1; }
 
-  /* ── Colour filter dropdown ── */
-  .cf-dropdown { position:relative; display:inline-block; }
-  .cf-menu { display:none; position:absolute; top:110%; left:0; background:var(--surface);
-             border:1px solid var(--border); z-index:300; min-width:130px; box-shadow:0 4px 12px rgba(0,0,0,.3); }
-  .cf-menu.open { display:block; }
-  .cf-opt { display:block; width:100%; padding:.35rem .8rem; background:transparent; border:none;
-            color:var(--text-dim); font-family:'Share Tech Mono',monospace; font-size:.62rem;
-            cursor:pointer; text-align:left; transition:background .15s; }
-  .cf-opt:hover, .cf-opt.cf-active { background:var(--accent); color:var(--bg); }
-  #btn-cf { font-family:'Share Tech Mono',monospace; font-size:.62rem; padding:.3rem .8rem;
-            background:transparent; border:1px solid var(--border); color:var(--dim); cursor:pointer; transition:all .18s; }
-  #btn-cf:hover { border-color:var(--accent); color:var(--accent); }
-  #btn-cf.cf-active { border-color:var(--accent2); color:var(--accent2); background:rgba(255,107,53,.08); }
+  /* ── Colour filter buttons ── */
+  .cf-btn {
+    font-family:'Share Tech Mono',monospace; font-size:.62rem;
+    padding:.28rem .72rem; background:transparent;
+    border:1px solid var(--border); color:var(--dim);
+    cursor:pointer; transition:all .18s; border-radius:2px;
+  }
+  .cf-btn:hover { border-color:var(--accent); color:var(--accent); }
+  .cf-btn.cf-blue-active   { border-color:#6495ED; color:#6495ED; background:rgba(100,149,237,.15); }
+  .cf-btn.cf-green-active  { border-color:#3CB371; color:#3CB371; background:rgba(60,179,113,.12); }
+  .cf-btn.cf-yellow-active { border-color:#d4a800; color:#d4a800; background:rgba(212,168,0,.12); }
+  .cf-btn.cf-pink-active   { border-color:#d47aab; color:#d47aab; background:rgba(212,122,171,.12); }
 
   /* ── OC game CSS ── */
 body.superpower .tile {
@@ -549,6 +552,7 @@ body.light .sb.c4 { background:rgba(192,32,106,.09);border-color:rgba(192,32,106
   background:rgba(59,130,246,.08);
   transform:translateY(-2px) scale(1.02);
 }
+body.light .tile { color:#1a2535 !important; }
 body.light .tile:hover:not(.sel):not(.off) { background:rgba(26,95,192,.06); }
 
 .tile.sel {
@@ -663,16 +667,21 @@ body.light .tile:hover:not(.sel):not(.off) { background:rgba(26,95,192,.06); }
 </style>
 </head>
 <body>
+<div id="colour-overlay"></div>
 
 <!-- NAME REGISTRATION MODAL -->
 <div id="name-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:500;align-items:center;justify-content:center;">
   <div style="background:var(--surface);border:1px solid var(--accent);padding:2rem 2rem 1.8rem;max-width:380px;width:90%;text-align:center;">
     <div style="font-size:2rem;margin-bottom:.8rem;">⌨</div>
-    <div style="font-family:'Orbitron',monospace;font-size:1rem;color:var(--accent);margin-bottom:.4rem;letter-spacing:.1em;">YEAR 9 — KEYWORD ARENA</div>
-    <div style="font-family:'Share Tech Mono',monospace;font-size:.75rem;color:var(--text-dim);margin-bottom:1.4rem;line-height:1.6;">Enter your name to appear on the class leaderboard. Your teacher can see your score!</div>
-    <input id="name-modal-input" type="text" placeholder="Your first name…" maxlength="30"
-      style="width:100%;font-family:'Share Tech Mono',monospace;font-size:1.1rem;text-align:center;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:.6rem 1rem;outline:none;margin-bottom:.3rem;letter-spacing:.05em;"
-      oninput="this.value=this.value.replace(/[^a-zA-Z0-9 \-]/g,'')"
+    <div style="font-family:'Orbitron',monospace;font-size:1rem;color:var(--accent);margin-bottom:.4rem;letter-spacing:.1em;">GCSE ARENA</div>
+    <div style="font-family:'Share Tech Mono',monospace;font-size:.75rem;color:var(--text-dim);margin-bottom:1.2rem;line-height:1.6;">Enter your name to appear on the class leaderboard.</div>
+    <input id="name-first-input" type="text" placeholder="First name…" maxlength="20"
+      style="width:100%;font-family:'Share Tech Mono',monospace;font-size:1rem;text-align:center;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:.55rem 1rem;outline:none;margin-bottom:.5rem;letter-spacing:.04em;"
+      oninput="this.value=this.value.replace(/[^a-zA-Z \-]/g,'')"
+      onkeydown="if(event.key==='Enter')document.getElementById('name-last-input').focus()"/>
+    <input id="name-last-input" type="text" placeholder="Last name…" maxlength="20"
+      style="width:100%;font-family:'Share Tech Mono',monospace;font-size:1rem;text-align:center;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:.55rem 1rem;outline:none;margin-bottom:.4rem;letter-spacing:.04em;"
+      oninput="this.value=this.value.replace(/[^a-zA-Z \-]/g,'')"
       onkeydown="if(event.key==='Enter')submitName()"/>
     <div id="name-modal-error" style="font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--red);min-height:1.2rem;margin-bottom:.6rem;"></div>
     <button onclick="submitName()" style="width:100%;font-family:'Orbitron',monospace;font-size:.78rem;font-weight:700;letter-spacing:.1em;padding:.7rem;background:var(--accent);border:none;color:var(--bg);cursor:pointer;">ENTER ARENA →</button>
@@ -689,20 +698,14 @@ body.light .tile:hover:not(.sel):not(.off) { background:rgba(26,95,192,.06); }
 </div>
 
 <header>
-  <h1>⌨ KS3 COMPUTER SCIENCE</h1>
-  <p class="sub">// CORBY BUSINESS ACADEMY — YEAR 9 REVISION //</p>
+  <h1>⌨ GCSE COMPUTER SCIENCE</h1>
+  <p class="sub">// GCSE COMPUTER SCIENCE ARENA //</p>
   <div class="header-controls">
     <button class="toggle-btn" id="btn-light" onclick="toggleLight()">☀ LIGHT</button>
-    <div class="cf-dropdown">
-      <button id="btn-cf" onclick="document.getElementById('cf-menu').classList.toggle('open')">🎨 COLOUR ▾</button>
-      <div class="cf-menu" id="cf-menu">
-        <button class="cf-opt" data-cf="none"   onclick="setColourFilter('none')">✕ Off</button>
-        <button class="cf-opt" data-cf="blue"   onclick="setColourFilter('blue')">🔵 Blue Tint</button>
-        <button class="cf-opt" data-cf="green"  onclick="setColourFilter('green')">🟢 Green Tint</button>
-        <button class="cf-opt" data-cf="yellow" onclick="setColourFilter('yellow')">🟡 Yellow Tint</button>
-        <button class="cf-opt" data-cf="pink"   onclick="setColourFilter('pink')">🩷 Pink Tint</button>
-      </div>
-    </div>
+    <button class="cf-btn" id="btn-cf-blue"   data-cf="blue"   onclick="setColourFilter('blue')">🔵 BLUE</button>
+    <button class="cf-btn" id="btn-cf-green"  data-cf="green"  onclick="setColourFilter('green')">🟢 GREEN</button>
+    <button class="cf-btn" id="btn-cf-yellow" data-cf="yellow" onclick="setColourFilter('yellow')">🟡 YELLOW</button>
+    <button class="cf-btn" id="btn-cf-pink"   data-cf="pink"   onclick="setColourFilter('pink')">🩷 PINK</button>
     <button class="toggle-btn" id="btn-super" onclick="toggleSuperpower()">⚡ SUPERPOWER</button>
   </div>
 </header>
@@ -726,14 +729,14 @@ body.light .tile:hover:not(.sel):not(.off) { background:rgba(26,95,192,.06); }
     <div class="game-card" onclick="showScreen('wordle');initWordle()">
       <span class="card-icon">🟩</span>
       <div class="card-title">CS WORDLE</div>
-      <div class="card-desc">Guess the Year 9 keyword in 6 tries using the definition clue.</div>
-      <div class="card-topic">▸ PYTHON · NETWORKS · SECURITY</div>
+      <div class="card-desc">Guess the hidden GCSE keyword in 6 tries.</div>
+      <div class="card-topic">▸ PYTHON · NETWORKS · SECURITY · ALGORITHMS</div>
     </div>
     <div class="game-card" onclick="showScreen('quiz');initQuiz()">
       <span class="card-icon">❓</span>
       <div class="card-title">QUIZ MODE</div>
-      <div class="card-desc">10 random questions from the full Year 9 question bank.</div>
-      <div class="card-topic">▸ ALL YEAR 9 TOPICS</div>
+      <div class="card-desc">10 random questions from the GCSE question bank.</div>
+      <div class="card-topic">▸ ALL GCSE TOPICS</div>
     </div>
     <div class="game-card" onclick="showScreen('connect4');initConnect4()">
       <span class="card-icon">🔴</span>
@@ -744,7 +747,7 @@ body.light .tile:hover:not(.sel):not(.off) { background:rgba(26,95,192,.06); }
     <div class="game-card" onclick="showScreen('hangman');initHangman()">
       <span class="card-icon">🪢</span>
       <div class="card-title">HANGMAN</div>
-      <div class="card-desc">Guess the Year 9 keyword letter by letter.</div>
+      <div class="card-desc">Guess the GCSE keyword letter by letter.</div>
       <div class="card-topic">▸ KEYWORD RECALL</div>
     </div>
     <div class="game-card" onclick="showScreen('python');initChallenge('python')" style="border-top:3px solid var(--green)">
@@ -776,7 +779,7 @@ body.light .tile:hover:not(.sel):not(.off) { background:rgba(26,95,192,.06); }
 
 <!-- WORDLE -->
 <div id="wordle" class="screen">
-  <div class="section-header"><h2>CS WORDLE</h2><p>// guess the hidden year 9 keyword //</p></div>
+  <div class="section-header"><h2>CS WORDLE</h2><p>// guess the hidden gcse keyword //</p></div>
   <div id="wordle-category"></div>
   <div id="wordle-hint"></div>
   <div id="wordle-grid"></div>
@@ -836,7 +839,7 @@ body.light .tile:hover:not(.sel):not(.off) { background:rgba(26,95,192,.06); }
 
 <!-- HANGMAN -->
 <div id="hangman" class="screen">
-  <div class="section-header"><h2>HANGMAN</h2><p>// guess the year 9 cs keyword //</p></div>
+  <div class="section-header"><h2>HANGMAN</h2><p>// guess the gcse cs keyword //</p></div>
   <div class="hangman-layout">
     <div>
       <svg id="hangman-svg" viewBox="0 0 160 180" xmlns="http://www.w3.org/2000/svg">
@@ -1056,7 +1059,7 @@ body.light .tile:hover:not(.sel):not(.off) { background:rgba(26,95,192,.06); }
   </div>
 </div>
 
-<footer>CORBY BUSINESS ACADEMY — COMPUTER SCIENCE DEPARTMENT // KS3 YEAR 9 REVISION</footer>
+<footer>GCSE COMPUTER SCIENCE ARENA</footer>
 
 <script>
 
@@ -1090,21 +1093,16 @@ function applyAll() {
     btnS.textContent = isSuperpower ? '⚡ SUPERPOWER ON' : '⚡ SUPERPOWER';
   }
 
-  // Remove all colour filter classes then re-add if set
+  // Remove all colour filter classes then re-add active one
   CF_CLASSES.forEach(cf => document.body.classList.remove(cf));
-  document.querySelectorAll('.cf-btn').forEach(b => b.classList.remove('cf-active'));
+  document.querySelectorAll('.cf-btn').forEach(b => {
+    const cf = b.dataset.cf;
+    b.classList.remove('cf-' + cf + '-active');
+  });
   if (currentFilter !== 'none') {
     document.body.classList.add('cf-' + currentFilter);
-    const cfBtn = document.querySelector('[data-cf="' + currentFilter + '"]');
-    if (cfBtn) cfBtn.classList.add('cf-active');
-  }
-  // Also update OC fdBtn label
-  const fdBtn = document.getElementById('fdBtn');
-  if (fdBtn) {
-    const lbl = currentFilter !== 'none'
-      ? currentFilter.charAt(0).toUpperCase() + currentFilter.slice(1)
-      : 'Colour Filter';
-    fdBtn.textContent = 'Colour Filter: ' + lbl + ' ▾';
+    const btn = document.getElementById('btn-cf-' + currentFilter);
+    if (btn) btn.classList.add('cf-' + currentFilter + '-active');
   }
 }
 
@@ -1145,13 +1143,18 @@ applyAll();
 let playerName = store.get('y9arena_player_name') || '';
 
 function submitName() {
-  const inp = document.getElementById('name-modal-input');
-  const err = document.getElementById('name-modal-error');
-  const name = inp ? inp.value.trim() : '';
-  if (!name) { if(err) err.textContent = '⚠ Please enter your name'; return; }
-  if (name.length < 2) { if(err) err.textContent = '⚠ Must be at least 2 characters'; return; }
+  const firstInp = document.getElementById('name-first-input');
+  const lastInp  = document.getElementById('name-last-input');
+  const err      = document.getElementById('name-modal-error');
+  const first = firstInp ? firstInp.value.trim() : '';
+  const last  = lastInp  ? lastInp.value.trim()  : '';
+  if (!first) { if(err) err.textContent = '⚠ Please enter your first name'; if(firstInp) firstInp.focus(); return; }
+  if (!last)  { if(err) err.textContent = '⚠ Please enter your last name';  if(lastInp)  lastInp.focus();  return; }
+  const name = first + ' ' + last;
   playerName = name;
   store.set('y9arena_player_name', name);
+  store.set('y9arena_player_first', first);
+  store.set('y9arena_player_last', last);
   const nd = document.getElementById('name-display');
   if (nd) nd.textContent = name;
   const modal = document.getElementById('name-modal');
@@ -1159,22 +1162,26 @@ function submitName() {
 }
 
 function changeName() {
-  const inp   = document.getElementById('name-modal-input');
-  const err   = document.getElementById('name-modal-error');
-  const modal = document.getElementById('name-modal');
-  if (inp) inp.value = playerName;
+  const firstInp = document.getElementById('name-first-input');
+  const lastInp  = document.getElementById('name-last-input');
+  const err      = document.getElementById('name-modal-error');
+  const modal    = document.getElementById('name-modal');
+  if (firstInp) firstInp.value = store.get('y9arena_player_first') || '';
+  if (lastInp)  lastInp.value  = store.get('y9arena_player_last')  || '';
   if (err) err.textContent = '';
-  if (modal) { modal.style.display = 'flex'; setTimeout(()=>inp&&inp.focus(),50); }
+  if (modal) { modal.style.display = 'flex'; setTimeout(()=>firstInp&&firstInp.focus(),50); }
 }
 
 function checkName() {
   if (!playerName) {
-    const inp   = document.getElementById('name-modal-input');
-    const err   = document.getElementById('name-modal-error');
-    const modal = document.getElementById('name-modal');
-    if (inp) inp.value = '';
+    const firstInp = document.getElementById('name-first-input');
+    const lastInp  = document.getElementById('name-last-input');
+    const err      = document.getElementById('name-modal-error');
+    const modal    = document.getElementById('name-modal');
+    if (firstInp) firstInp.value = '';
+    if (lastInp)  lastInp.value  = '';
     if (err) err.textContent = '';
-    if (modal) { modal.style.display = 'flex'; setTimeout(()=>inp&&inp.focus(),50); }
+    if (modal) { modal.style.display = 'flex'; setTimeout(()=>firstInp&&firstInp.focus(),50); }
     return false;
   }
   return true;
@@ -1232,14 +1239,10 @@ function showScreen(id) {
   const el = document.getElementById(id);
   if (el) el.classList.add('active');
   document.querySelectorAll('[data-screen="'+id+'"]').forEach(b => b.classList.add('active'));
-  if (id === 'wordsearch') { wsRenderLB(); }
+  if (id === 'wordsearch') { wsRenderLB(); setTimeout(newGame, 50); }
+  if (id === 'onlyconnect') { if(typeof boot==='function' && document.getElementById('psel') && !document.getElementById('psel').children.length) boot(); }
 }
-document.addEventListener('click', e => {
-  if (!e.target.closest('.cf-dropdown')) {
-    const m = document.getElementById('cf-menu');
-    if (m) m.classList.remove('open');
-  }
-});
+
 
 // ─── YEAR 9 DATA ────────────────────────────────────────────
 const KEYWORDS = [
@@ -2447,7 +2450,7 @@ function load(idx) {
   PUZZLES[idx].groups.forEach((g,gi) =>
     g.words.forEach(w => tiles.push({w,gi,done:false}))
   );
-  shuffle(tiles);
+  tiles = shuffle(tiles);
   ocRenderLives();
   ocRenderGrid();
   document.getElementById('sbgroup').innerHTML='';
@@ -2613,7 +2616,7 @@ document.addEventListener('DOMContentLoaded', function() {
   if (playerName) {
     if (nd) nd.textContent = playerName;
   } else {
-    if (modal) { modal.style.display = 'flex'; setTimeout(()=>{const i=document.getElementById('name-modal-input');if(i)i.focus();},100); }
+    if (modal) { modal.style.display = 'flex'; setTimeout(()=>{const i=document.getElementById('name-first-input');if(i)i.focus();},100); }
   }
   initWordle(); initQuiz(); initConnect4(); initHangman();
   boot();
