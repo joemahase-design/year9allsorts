@@ -37,6 +37,10 @@
   body.dyslexia {
     --dysfont:'OpenDyslexic','Comic Sans MS',cursive;
   }
+  /* Dyslexia dark mode: boost contrast */
+  body.dyslexia:not(.light) .word-item,
+  body.dyslexia:not(.light) #hint-text { color:#e8f4ff !important; }
+  body.dyslexia:not(.light) .ws-cell   { color:#c0d8f0 !important; }
   /* Apply dyslexic font to all reading content */
   body.dyslexia .quiz-opt, body.dyslexia .ch-opt, body.dyslexia .c4-opt,
   body.dyslexia #quiz-question, body.dyslexia #c4-q-text,
@@ -293,7 +297,7 @@
 
   /* ── OC game CSS ── */
 body.superpower .tile {
-  font-size:.82rem !important;
+  font-size:clamp(.88rem,2.8vw,1.1rem) !important;
   padding:10px 6px !important;
   line-height:1.4 !important;
 }
@@ -552,7 +556,7 @@ body.light .sb.c4 { background:rgba(192,32,106,.09);border-color:rgba(192,32,106
   text-align:center;
   padding:7px 5px;
   font-family:'JetBrains Mono',monospace;
-  font-size:clamp(.72rem,2vw,.9rem);
+  font-size:clamp(.82rem,2.5vw,1.05rem);
   font-weight:700;
   color:var(--txt);
   cursor:pointer;
@@ -670,7 +674,7 @@ body.light .tile:hover:not(.sel):not(.off) { background:rgba(26,95,192,.06); }
 /* ══ RESPONSIVE ═══════════════════════════════ */
 @media(max-width:500px) {
   .grid  { gap:4px; }
-  .tile  { font-size:.62rem;padding:6px 4px; }
+  .tile  { font-size:clamp(.78rem,2.2vw,1rem); }
   .btn   { padding:8px 12px;font-size:.62rem; }
   .hbody { grid-template-columns:1fr; }
   .toolbar { justify-content:center; }
@@ -2158,10 +2162,11 @@ function wsClearLB() {
 }
 
 function wsSubmitScore() {
-  const name = document.getElementById('winner-name').value.trim() || 'Anonymous';
+  const name = (document.getElementById('winner-name').value || '').trim() || playerName || 'Anonymous';
   wsAddToLB(name, seconds, difficulty);
   wsRenderLB();
-newGame();
+  document.getElementById('ws-win-overlay').classList.remove('show');
+  newGame();
 }
 
 
@@ -2349,19 +2354,34 @@ function renderGrid() {
       cell.className = 'ws-cell';
       cell.textContent = grid[r][c];
       cell.dataset.r = r; cell.dataset.c = c;
-
-      // Mouse events
-      cell.addEventListener('mousedown',  e => startSelect(r,c,e));
-      cell.addEventListener('mouseover',  e => moveSelect(r,c,e));
-      cell.addEventListener('mouseup',    e => endSelect(e));
-      // Touch events
-      cell.addEventListener('touchstart', e => { e.preventDefault(); startSelect(r,c,e); }, {passive:false});
-      cell.addEventListener('touchmove',  e => { e.preventDefault(); handleTouchMove(e); }, {passive:false});
-      cell.addEventListener('touchend',   e => { e.preventDefault(); endSelect(e); }, {passive:false});
-
       el.appendChild(cell);
     }
   }
+
+  // Attach events to grid container (delegation) - much more accurate
+  el.onmousedown = e => {
+    const t = e.target.closest('.ws-cell');
+    if (t) startSelect(+t.dataset.r, +t.dataset.c, e);
+  };
+  el.onmouseover = e => {
+    if (!selecting) return;
+    const t = e.target.closest('.ws-cell');
+    if (t) moveSelect(+t.dataset.r, +t.dataset.c, e);
+  };
+  el.onmouseup = e => endSelect(e);
+  el.ontouchstart = e => {
+    e.preventDefault();
+    const t = e.target.closest('.ws-cell');
+    if (t) startSelect(+t.dataset.r, +t.dataset.c, e);
+  };
+  el.ontouchmove = e => {
+    e.preventDefault();
+    const touch = e.touches[0];
+    const over  = document.elementFromPoint(touch.clientX, touch.clientY);
+    const t     = over && over.closest('.ws-cell');
+    if (t) moveSelect(+t.dataset.r, +t.dataset.c, e);
+  };
+  el.ontouchend = e => { e.preventDefault(); endSelect(e); };
 }
 
 function renderWordList() {
