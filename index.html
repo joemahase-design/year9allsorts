@@ -2464,21 +2464,22 @@ function getCellsInLine(r1, c1, r2, c2) {
   if (r1===r2 && c1===c2) return [[r1,c1]];
   const dr = r2-r1, dc = c2-c1;
 
-  // Work out which of the 8 strict directions best matches the drag angle
-  const angle = Math.atan2(dc, dr) * 180 / Math.PI; // -180 to 180
-  // Snap angle to nearest 45°
+  // Snap drag vector to nearest of 8 directions using atan2
+  const angle   = Math.atan2(dr, dc) * 180 / Math.PI;
   const snapped = Math.round(angle / 45) * 45;
-  const stepR = Math.round(Math.sin(snapped * Math.PI / 180));
-  const stepC = Math.round(Math.cos(snapped * Math.PI / 180));
+  const stepC   = Math.round(Math.cos(snapped * Math.PI / 180)); // col step
+  const stepR   = Math.round(Math.sin(snapped * Math.PI / 180)); // row step
 
-  // Length = how many steps along the snapped direction
-  const len = (stepR !== 0 && stepC !== 0)
-    ? Math.round(Math.max(Math.abs(dr), Math.abs(dc)))  // diagonal
-    : (stepR !== 0 ? Math.abs(dr) : Math.abs(dc));      // straight
+  // Length along the snapped direction
+  const len = Math.max(Math.abs(dr), Math.abs(dc));
 
   const cells = [];
-  for (let i=0; i<=len; i++) cells.push([r1+stepR*i, c1+stepC*i]);
-  return cells.filter(([r,c]) => r>=0 && r<gridSize && c>=0 && c<gridSize);
+  for (let i = 0; i <= len; i++) {
+    const r = r1 + stepR * i;
+    const c = c1 + stepC * i;
+    if (r >= 0 && r < gridSize && c >= 0 && c < gridSize) cells.push([r, c]);
+  }
+  return cells;
 }
 
 function highlightSelecting() {
