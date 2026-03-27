@@ -1448,7 +1448,7 @@ function showScreen(id) {
   const el = document.getElementById(id);
   if (el) el.classList.add('active');
   document.querySelectorAll('[data-screen="'+id+'"]').forEach(b => b.classList.add('active'));
-  if (id === 'wordsearch') { wsRenderLB(); setTimeout(newGame, 50); }
+  if (id === 'wordsearch') { selecting=false; clearSelecting(); wsRenderLB(); setTimeout(newGame, 50); }
   if (id === 'onlyconnect') { if(typeof boot==='function' && document.getElementById('psel') && !document.getElementById('psel').children.length) boot(); }
 }
 
@@ -2288,6 +2288,9 @@ function newGame() {
   stopTimer();
   seconds   = 0;
   gameOver  = false;
+  selecting = false;
+  selectCells = [];
+  selectStart = null;
   foundWords= new Set();
   colorIdx  = 0;
   updateTimer();
@@ -2370,7 +2373,7 @@ function renderGrid() {
 
       // Mouse events
       cell.addEventListener('mousedown',  e => startSelect(r,c,e));
-      cell.addEventListener('mouseover',  e => moveSelect(r,c,e));
+      cell.addEventListener('mouseover',  e => { if (e.buttons === 1) moveSelect(r,c,e); });
       cell.addEventListener('mouseup',    e => endSelect(e));
       // Touch events
       cell.addEventListener('touchstart', e => { e.preventDefault(); startSelect(r,c,e); }, {passive:false});
